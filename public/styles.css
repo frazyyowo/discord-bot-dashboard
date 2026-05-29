@@ -1,17 +1,17 @@
 :root {
   color-scheme: dark;
-  --bg: #0c0d12;
-  --panel: #171922;
-  --panel-strong: #202331;
-  --line: #303447;
-  --text: #f4f5fb;
-  --muted: #aeb4c7;
-  --soft: #d8dcef;
-  --blue: #5865f2;
-  --green: #21a675;
-  --red: #e15a5a;
-  --peach: #ffd8c2;
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  --bg: #0d0d12;
+  --panel: #171720;
+  --panel-strong: #20202b;
+  --line: #32323e;
+  --text: #f7f4ff;
+  --muted: #aaa4bb;
+  --soft: #ddd7ef;
+  --blue: #a996ff;
+  --green: #23a876;
+  --red: #dc5b6c;
+  --peach: #ffc4d0;
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
 }
 
 * {
@@ -21,9 +21,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(88, 101, 242, 0.16), transparent 34rem),
-    linear-gradient(135deg, #0c0d12 0%, #11131a 52%, #090a0f 100%);
+  background: var(--bg);
   color: var(--text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -31,6 +29,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -57,7 +56,7 @@ button:disabled {
 }
 
 .sidebar {
-  background: rgba(13, 15, 22, 0.86);
+  background: #111119;
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
@@ -71,20 +70,22 @@ button:disabled {
   gap: 12px;
 }
 
-.brand-mark {
-  align-items: center;
-  background: linear-gradient(135deg, var(--blue), var(--green));
-  border-radius: 8px;
-  display: grid;
-  font-weight: 900;
+.brand-pfp {
+  border: 1px solid var(--line);
+  border-radius: 50%;
   height: 42px;
-  place-items: center;
+  object-fit: cover;
   width: 42px;
 }
 
 .brand strong,
 .brand span {
   display: block;
+}
+
+.brand strong {
+  font-size: 18px;
+  letter-spacing: 0;
 }
 
 .brand span,
@@ -104,7 +105,7 @@ label span,
 }
 
 .primary-button {
-  background: var(--blue);
+  background: #7f6aff;
 }
 
 .success-button {
@@ -127,7 +128,7 @@ label span,
 }
 
 .script-card {
-  background: var(--panel);
+  background: #15151d;
   border: 1px solid transparent;
   border-radius: 8px;
   color: inherit;
@@ -137,7 +138,7 @@ label span,
 
 .script-card.active {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.18);
+  box-shadow: 0 0 0 3px rgba(169, 150, 255, 0.16);
 }
 
 .script-card strong,
@@ -166,7 +167,7 @@ label span,
 }
 
 .topbar h1 {
-  font-size: 30px;
+  font-size: 34px;
   letter-spacing: 0;
   line-height: 1.1;
   margin: 0;
@@ -206,18 +207,41 @@ label span,
 }
 
 .editor-panel,
-.preview-panel {
-  background: rgba(23, 25, 34, 0.94);
+.preview-panel,
+.social-panel {
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
   min-width: 0;
 }
 
-.editor-panel {
+.editor-panel,
+.social-panel {
   display: grid;
   gap: 14px;
   padding: 18px;
+}
+
+.side-stack {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.panel-head {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+}
+
+.panel-head strong {
+  font-size: 18px;
+}
+
+.panel-head span {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .preview-panel {
@@ -263,6 +287,7 @@ label span,
 }
 
 input,
+select,
 textarea {
   background: #0e1017;
   border: 1px solid var(--line);
@@ -280,9 +305,10 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.18);
+  box-shadow: 0 0 0 3px rgba(169, 150, 255, 0.18);
 }
 
 input[type="color"] {
@@ -307,7 +333,7 @@ input[type="color"] {
 }
 
 .discord-frame {
-  background: #313338;
+  background: #2f3035;
   display: grid;
   gap: 12px;
   grid-template-columns: 44px minmax(0, 1fr);
@@ -316,13 +342,10 @@ input[type="color"] {
 }
 
 .avatar {
-  align-items: center;
-  background: linear-gradient(135deg, var(--green), var(--blue));
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
-  display: grid;
-  font-weight: 900;
   height: 42px;
-  place-items: center;
+  object-fit: cover;
   width: 42px;
 }
 
@@ -452,7 +475,7 @@ input[type="color"] {
 }
 
 .login-card {
-  background: rgba(23, 25, 34, 0.94);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
@@ -464,8 +487,13 @@ input[type="color"] {
   width: 100%;
 }
 
-.login-card .brand-mark {
+.login-pfp {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  height: 86px;
   margin: 0 auto;
+  object-fit: cover;
+  width: 86px;
 }
 
 .login-card h1 {
@@ -483,7 +511,7 @@ input[type="color"] {
 
 .login-button {
   align-items: center;
-  background: var(--blue);
+  background: #7f6aff;
   border-radius: 8px;
   color: var(--text);
   display: flex;

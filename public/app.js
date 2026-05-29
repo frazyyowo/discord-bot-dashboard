@@ -31,6 +31,13 @@ const elements = {
   scriptName: document.querySelector("#scriptName"),
   selectedScriptId: document.querySelector("#selectedScriptId"),
   sendButton: document.querySelector("#sendButton"),
+  sendSocialButton: document.querySelector("#sendSocialButton"),
+  socialCaption: document.querySelector("#socialCaption"),
+  socialChannelId: document.querySelector("#socialChannelId"),
+  socialForm: document.querySelector("#socialForm"),
+  socialPlatform: document.querySelector("#socialPlatform"),
+  socialPostUrl: document.querySelector("#socialPostUrl"),
+  socialToast: document.querySelector("#socialToast"),
   templateButton: document.querySelector("#templateButton"),
   toast: document.querySelector("#toast"),
   userAvatar: document.querySelector("#userAvatar"),
@@ -39,7 +46,7 @@ const elements = {
 
 const blankScript = () => ({
   id: "",
-  name: "New Message Panel",
+  name: "new panel",
   description: "",
   enabled: true,
   channelId: "",
@@ -63,26 +70,26 @@ const blankScript = () => ({
 const rulesTemplate = () => ({
   ...blankScript(),
   id: state.currentId ?? "",
-  name: "Rules Welcome Panel",
-  description: "Rules, roles, navigation, and modmail.",
+  name: "rules panel",
+  description: "rules, roles, navigation, modmail",
   message: {
     content:
-      "Welcome to your server\nThis community is built for members to hang out, share interests, and find everything fast.",
+      "welcome to the server\nhang out, post stuff, and be cool.",
     embeds: [
       {
-        title: "Start Here",
+        title: "start here",
         description:
-          "Feel free to hang out with members, share interests, and become part of the community!\n\nBe sure to review the server rules, claim profile roles, navigate the community, and learn how to contact Moderators.",
-        color: "#57f287",
+          "read the rules, grab roles, use navigation, and message mods if you need help.",
+        color: "#a996ff",
         thumbnail: "",
         image: "",
-        footer: "Server guide",
+        footer: "frazbot",
         fields: []
       }
     ],
     buttons: [
-      { label: "Server Rules", url: "https://discord.com", emoji: "" },
-      { label: "Claim Roles", url: "https://discord.com", emoji: "" },
+      { label: "Rules", url: "https://discord.com", emoji: "" },
+      { label: "Roles", url: "https://discord.com", emoji: "" },
       { label: "Navigation", url: "https://discord.com", emoji: "" },
       { label: "ModMail", url: "https://discord.com", emoji: "" }
     ]
@@ -92,6 +99,11 @@ const rulesTemplate = () => ({
 function setToast(message, isError = false) {
   elements.toast.textContent = message;
   elements.toast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
+}
+
+function setSocialToast(message, isError = false) {
+  elements.socialToast.textContent = message;
+  elements.socialToast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
 }
 
 async function api(path, options = {}) {
@@ -160,7 +172,7 @@ function fillForm(script) {
 function formToScript() {
   const script = blankScript();
   script.id = state.currentId ?? "";
-  script.name = elements.scriptName.value.trim() || "Untitled Script";
+  script.name = elements.scriptName.value.trim() || "untitled";
   script.description = elements.scriptDescription.value.trim();
   script.channelId = elements.channelId.value.trim();
   script.message.content = elements.messageContent.value.trim();
@@ -320,6 +332,26 @@ elements.newScriptButton.addEventListener("click", () => {
 elements.templateButton.addEventListener("click", () => {
   fillForm(rulesTemplate());
   setToast("");
+});
+
+elements.socialForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const data = await api("/social-post", {
+      method: "POST",
+      body: JSON.stringify({
+        platform: elements.socialPlatform.value,
+        postUrl: elements.socialPostUrl.value.trim(),
+        caption: elements.socialCaption.value.trim(),
+        channelId: elements.socialChannelId.value.trim() || elements.channelId.value.trim()
+      })
+    });
+    if (data) {
+      setSocialToast(`Sent ${data.messageId}.`);
+    }
+  } catch (error) {
+    setSocialToast(error.message, true);
+  }
 });
 
 for (const input of elements.editorForm.querySelectorAll("input, textarea")) {

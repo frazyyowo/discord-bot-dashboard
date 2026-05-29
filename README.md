@@ -1,6 +1,6 @@
-# Mega Discord Bot Dashboard
+# frazbot
 
-This is a starter kit for a custom Discord bot plus a private web dashboard. The dashboard creates safe "scripts" for messages, embeds, images, and link buttons. The bot can send those scripts from the website or through `/script send`.
+Custom Discord bot plus a private web dashboard.
 
 ## What You Built
 
@@ -10,7 +10,9 @@ This is a starter kit for a custom Discord bot plus a private web dashboard. The
 - Discord login for the dashboard
 - Discord user ID allow-list
 - Script files stored in `data/scripts/*.json`
-- Example rules/welcome panel in `data/scripts/rules.json`
+- Rules panel in `data/scripts/rules.json`
+- Social post maker for Twitch, TikTok, Instagram, and X/Twitter links
+- Secret webhook endpoint for external automation tools
 
 ## Setup
 
@@ -56,6 +58,8 @@ This is a starter kit for a custom Discord bot plus a private web dashboard. The
    DISCORD_GUILD_ID=your_test_server_id_here
    DISCORD_ALLOWED_USER_IDS=your_discord_user_id_here
    PUBLIC_URL=http://localhost:3000
+   AUTOMATION_SECRET=make-this-long-and-random
+   SOCIAL_POST_CHANNEL_ID=your_announcement_channel_id
    PORT=3000
    ```
 
@@ -213,11 +217,40 @@ Good next modules:
 - Auto moderation logs
 - Giveaway system
 - Music/status feed
-- Twitch/YouTube announcement posts
+- Automatic Twitch/Instagram/TikTok/X announcements
 - Website login with Discord OAuth2
 - Per-server settings if the bot joins many servers
 
 Keep the dashboard "scripts" as safe templates. Do not let random website text run as JavaScript inside your bot process. If you want custom code modules later, add them as trusted files in `src/modules`, review them, then restart the bot.
+
+## Social Post Maker
+
+The dashboard has a post maker for Twitch, TikTok, Instagram, and X/Twitter. Paste a post link, write the caption, set the channel ID, and send it.
+
+There is also an automation endpoint:
+
+```text
+POST https://your-domain.com/webhooks/social
+```
+
+Headers:
+
+```text
+X-Automation-Secret: your AUTOMATION_SECRET value
+```
+
+JSON body:
+
+```json
+{
+  "platform": "twitch",
+  "postUrl": "https://twitch.tv/yourchannel",
+  "caption": "@everyone live now",
+  "channelId": "123456789012345678"
+}
+```
+
+This endpoint is meant for Make, Zapier, IFTTT, Twitch EventSub, TikTok webhooks, or your own scripts.
 
 ## Official References
 

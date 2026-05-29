@@ -8,7 +8,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "deploy": "node src/deploy-commands.js",
-    "check": "node --check src/index.js && node --check src/auth.js && node --check src/bot.js && node --check src/config.js && node --check src/deploy-commands.js && node --check src/messagePayload.js && node --check src/server.js && node --check src/storage.js && node --check public/app.js"
+    "check": "node --check src/index.js && node --check src/auth.js && node --check src/bot.js && node --check src/config.js && node --check src/deploy-commands.js && node --check src/messagePayload.js && node --check src/server.js && node --check src/socialPost.js && node --check src/storage.js && node --check public/app.js"
   },
   "dependencies": {
     "discord.js": "^14.26.4"

@@ -105,7 +105,7 @@ function forbiddenPage(user, allowedIds) {
   </head>
   <body class="login-body">
     <main class="login-card">
-      <div class="brand-mark">BS</div>
+      <img class="login-pfp" src="/assets/frazyypfp.jpg" alt="" />
       <h1>Access denied</h1>
       <p>You logged in as ${user.username}, but this Discord user ID is not on the dashboard allow-list.</p>
       <p class="login-meta">Your ID: ${user.id}<br />Allowed IDs: ${ids}</p>

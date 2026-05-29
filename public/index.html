@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Discord Bot Studio</title>
+    <title>frazbot</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">BS</div>
+          <img class="brand-pfp" src="/assets/frazyypfp.jpg" alt="" />
           <div>
-            <strong>Bot Studio</strong>
-            <span>Message scripts</span>
+            <strong>frazbot</strong>
+            <span>server panel</span>
           </div>
         </div>
 
         <div class="sidebar-actions">
           <button class="primary-button" id="newScriptButton" type="button">New</button>
-          <button class="ghost-button" id="templateButton" type="button">Rules Template</button>
+          <button class="ghost-button" id="templateButton" type="button">Rules</button>
         </div>
 
         <div class="script-list" id="scriptList"></div>
@@ -28,8 +28,8 @@
       <main class="main">
         <header class="topbar">
           <div>
-            <h1>Server Message Builder</h1>
-            <p>Build polished Discord panels, buttons, and embeds.</p>
+            <h1>frazbot</h1>
+            <p>messages, posts, server stuff</p>
           </div>
           <div class="topbar-tools">
             <span class="status-pill" id="botStatus">Checking</span>
@@ -43,24 +43,28 @@
 
         <section class="workspace">
           <form class="editor-panel" id="editorForm">
+            <div class="panel-head">
+              <strong>message</strong>
+              <span>saved panels</span>
+            </div>
             <div class="form-grid">
               <label>
                 <span>Name</span>
                 <input id="scriptName" type="text" maxlength="80" required />
               </label>
               <label>
-                <span>Default channel ID</span>
+                <span>Channel ID</span>
                 <input id="channelId" type="text" inputmode="numeric" />
               </label>
             </div>
 
             <label>
-              <span>Short note</span>
+              <span>Note</span>
               <input id="scriptDescription" type="text" maxlength="240" />
             </label>
 
             <label>
-              <span>Message content</span>
+              <span>Text</span>
               <textarea id="messageContent" rows="4" maxlength="2000"></textarea>
             </label>
 
@@ -111,29 +115,63 @@
             <p class="toast" id="toast"></p>
           </form>
 
-          <section class="preview-panel">
-            <div class="preview-toolbar">
-              <span>Preview</span>
-              <span id="selectedScriptId">unsaved</span>
-            </div>
-            <div class="discord-frame">
-              <div class="avatar">B</div>
-              <div class="discord-message">
-                <div class="message-meta">
-                  <strong>Server Bot</strong>
-                  <span>Today at 12:00</span>
-                </div>
-                <div class="message-content" id="previewContent"></div>
-                <div class="embed-preview" id="embedPreview">
-                  <div class="embed-title" id="previewEmbedTitle"></div>
-                  <div class="embed-description" id="previewEmbedDescription"></div>
-                  <img class="embed-image" id="previewEmbedImage" alt="" />
-                  <div class="embed-footer" id="previewEmbedFooter"></div>
-                </div>
-                <div class="button-preview" id="previewButtons"></div>
+          <div class="side-stack">
+            <form class="social-panel" id="socialForm">
+              <div class="panel-head">
+                <strong>post maker</strong>
+                <span>social alerts</span>
               </div>
-            </div>
-          </section>
+              <div class="form-grid">
+                <label>
+                  <span>Platform</span>
+                  <select id="socialPlatform">
+                    <option value="twitch">Twitch</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="twitter">X / Twitter</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Channel ID</span>
+                  <input id="socialChannelId" type="text" inputmode="numeric" />
+                </label>
+              </div>
+              <label>
+                <span>Post link</span>
+                <input id="socialPostUrl" type="url" />
+              </label>
+              <label>
+                <span>Caption</span>
+                <textarea id="socialCaption" rows="3" maxlength="1500"></textarea>
+              </label>
+              <button class="success-button" id="sendSocialButton" type="submit">Send post</button>
+              <p class="toast" id="socialToast"></p>
+            </form>
+
+            <section class="preview-panel">
+              <div class="preview-toolbar">
+                <span>Preview</span>
+                <span id="selectedScriptId">unsaved</span>
+              </div>
+              <div class="discord-frame">
+                <img class="avatar" src="/assets/frazyypfp.jpg" alt="" />
+                <div class="discord-message">
+                  <div class="message-meta">
+                    <strong>frazbot</strong>
+                    <span>Today</span>
+                  </div>
+                  <div class="message-content" id="previewContent"></div>
+                  <div class="embed-preview" id="embedPreview">
+                    <div class="embed-title" id="previewEmbedTitle"></div>
+                    <div class="embed-description" id="previewEmbedDescription"></div>
+                    <img class="embed-image" id="previewEmbedImage" alt="" />
+                    <div class="embed-footer" id="previewEmbedFooter"></div>
+                  </div>
+                  <div class="button-preview" id="previewButtons"></div>
+                </div>
+              </div>
+            </section>
+          </div>
         </section>
       </main>
     </div>

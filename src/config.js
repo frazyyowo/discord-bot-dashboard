@@ -47,12 +47,14 @@ export function getConfig() {
   return {
     adminKey: process.env.ADMIN_KEY ?? "",
     allowedUserIds,
+    automationSecret: process.env.AUTOMATION_SECRET ?? "",
     clientId: process.env.DISCORD_CLIENT_ID ?? "",
     clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
     discordToken: process.env.DISCORD_TOKEN ?? "",
     guildId: process.env.DISCORD_GUILD_ID ?? "",
     port: Number.isFinite(parsedPort) ? parsedPort : 3000,
     publicUrl: process.env.PUBLIC_URL ?? "",
-    publicDir: path.resolve(process.cwd(), "public")
+    publicDir: path.resolve(process.cwd(), "public"),
+    socialPostChannelId: process.env.SOCIAL_POST_CHANNEL_ID ?? ""
   };
 }

@@ -48,6 +48,8 @@ Render is still the easiest free start. For a serious always-online bot, use a V
    DISCORD_GUILD_ID=your_server_id
    DISCORD_ALLOWED_USER_IDS=your_discord_user_id
    PUBLIC_URL=https://panel.yourdomain.com
+   AUTOMATION_SECRET=make-this-long-and-random
+   SOCIAL_POST_CHANNEL_ID=your_announcement_channel_id
    ```
 
 5. Add your custom domain in Render:

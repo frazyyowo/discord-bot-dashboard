@@ -2,10 +2,13 @@ import { promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
 import { createAuth } from "./auth.js";
+import { buildSocialPostScript, listSocialPlatforms } from "./socialPost.js";
 
 const MIME_TYPES = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".png": "image/png",
@@ -75,6 +78,42 @@ async function serveStatic(request, response, url, config) {
   }
 }
 
+function requestAutomationSecret(request, url) {
+  return request.headers["x-automation-secret"] ?? url.searchParams.get("secret") ?? "";
+}
+
+async function handleWebhook(request, response, url, { bot, config }) {
+  if (url.pathname !== "/webhooks/social") {
+    return false;
+  }
+
+  if (!config.automationSecret) {
+    sendJson(response, 503, { error: "AUTOMATION_SECRET is not configured." });
+    return true;
+  }
+
+  if (requestAutomationSecret(request, url) !== config.automationSecret) {
+    sendJson(response, 401, { error: "Wrong automation secret." });
+    return true;
+  }
+
+  if (request.method !== "POST") {
+    sendJson(response, 405, { error: "Method not allowed." });
+    return true;
+  }
+
+  const body = await readBody(request);
+  const script = buildSocialPostScript(body, config.socialPostChannelId);
+  const sent = await bot.sendScript(script, script.channelId);
+  sendJson(response, 200, {
+    ok: true,
+    channelId: sent.channelId,
+    messageId: sent.id,
+    url: sent.url
+  });
+  return true;
+}
+
 function requireApiAuth(request, response, auth) {
   if (!auth.isConfigured()) {
     sendJson(response, 503, {
@@ -115,6 +154,24 @@ async function handleApi(request, response, url, { storage, bot, config, auth })
 
   if (request.method === "GET" && resource === "me") {
     sendJson(response, 200, { user: session.user });
+    return;
+  }
+
+  if (request.method === "GET" && resource === "social-platforms") {
+    sendJson(response, 200, { platforms: listSocialPlatforms() });
+    return;
+  }
+
+  if (request.method === "POST" && resource === "social-post") {
+    const body = await readBody(request);
+    const script = buildSocialPostScript(body, config.socialPostChannelId);
+    const sent = await bot.sendScript(script, script.channelId);
+    sendJson(response, 200, {
+      ok: true,
+      channelId: sent.channelId,
+      messageId: sent.id,
+      url: sent.url
+    });
     return;
   }
 
@@ -190,12 +247,16 @@ export function createDashboardServer({ storage, bot, config }) {
         return;
       }
 
+      if (await handleWebhook(request, response, url, { bot, config })) {
+        return;
+      }
+
       if (url.pathname.startsWith("/api/")) {
         await handleApi(request, response, url, { storage, bot, config, auth });
         return;
       }
 
-      if (!publicPaths.has(url.pathname)) {
+      if (!publicPaths.has(url.pathname) && !url.pathname.startsWith("/assets/")) {
         const session = auth.requireAuth(request, response);
         if (!session) {
           return;

@@ -1,27 +1,27 @@
 {
   "id": "rules",
-  "name": "Rules Welcome Panel",
-  "description": "A polished server intro with rules, roles, navigation, and modmail buttons.",
+  "name": "rules panel",
+  "description": "rules, roles, navigation, modmail",
   "enabled": true,
   "channelId": "",
   "message": {
-    "content": "Welcome to your server\nThis community is built for members to hang out, share interests, and find everything fast.",
+    "content": "welcome to the server\nhang out, post stuff, and be cool.",
     "embeds": [
       {
-        "title": "Start Here",
-        "description": "Feel free to hang out with members, share interests, and become part of the community!\n\nBe sure to review the server rules, claim profile roles, navigate the community, and learn how to contact Moderators.",
-        "color": "#57F287",
+        "title": "start here",
+        "description": "read the rules, grab roles, use navigation, and message mods if you need help.",
+        "color": "#A996FF",
         "thumbnail": "",
         "image": "",
-        "footer": "Server guide",
+        "footer": "frazbot",
         "fields": [
           {
-            "name": "Vanity URL",
+            "name": "invite",
             "value": "https://discord.gg/yourinvite",
             "inline": true
           },
           {
-            "name": "Established",
+            "name": "started",
             "value": "2026",
             "inline": true
           }
@@ -30,12 +30,12 @@
     ],
     "buttons": [
       {
-        "label": "Server Rules",
+          "label": "Rules",
         "url": "https://discord.com",
         "emoji": ""
       },
       {
-        "label": "Claim Roles",
+          "label": "Roles",
         "url": "https://discord.com",
         "emoji": ""
       },
