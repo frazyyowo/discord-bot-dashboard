@@ -84,11 +84,23 @@ function canManageGuild(interaction) {
 
 export function createBot({ storage, config }) {
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
   });
 
   client.once("ready", () => {
     console.log(`Discord bot logged in as ${client.user.tag}`);
+  });
+
+  client.on("messageCreate", async (message) => {
+    if (message.author.bot || !client.user) {
+      return;
+    }
+
+    if (!message.mentions.users.has(client.user.id)) {
+      return;
+    }
+
+    await message.reply("meow :3");
   });
 
   client.on("interactionCreate", async (interaction) => {
