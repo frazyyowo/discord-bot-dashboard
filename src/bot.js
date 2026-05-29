@@ -82,6 +82,30 @@ function canManageGuild(interaction) {
   return interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild);
 }
 
+function rulesReplyFromScript(script) {
+  const embed = script?.message?.embeds?.[0] ?? {};
+  const lines = [];
+
+  if (embed.title) {
+    lines.push(`**${embed.title}**`);
+  }
+  if (embed.description) {
+    lines.push(embed.description);
+  }
+  if (Array.isArray(embed.fields)) {
+    for (const field of embed.fields) {
+      if (field.name && field.value) {
+        lines.push(`**${field.name}:** ${field.value}`);
+      }
+    }
+  }
+
+  return (
+    lines.join("\n\n").trim() ||
+    "read the rules, grab roles, use navigation, and message mods if you need help."
+  ).slice(0, 1900);
+}
+
 export function createBot({ storage, config }) {
   const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
@@ -105,6 +129,15 @@ export function createBot({ storage, config }) {
 
   client.on("interactionCreate", async (interaction) => {
     try {
+      if (interaction.isButton() && interaction.customId === "frazbot:rules") {
+        const script = await storage.getScript("rules");
+        await interaction.reply({
+          content: rulesReplyFromScript(script),
+          flags: MessageFlags.Ephemeral
+        });
+        return;
+      }
+
       if (interaction.isAutocomplete() && interaction.commandName === "script") {
         const focused = interaction.options.getFocused().toLowerCase();
         const scripts = await storage.listScripts();

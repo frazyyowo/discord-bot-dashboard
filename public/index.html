@@ -20,6 +20,7 @@
         <div class="sidebar-actions">
           <button class="primary-button" id="newScriptButton" type="button">New</button>
           <button class="ghost-button" id="templateButton" type="button">Rules</button>
+          <button class="ghost-button" id="autoPostsButton" type="button">Auto posts</button>
         </div>
 
         <div class="script-list" id="scriptList"></div>
@@ -116,10 +117,10 @@
           </form>
 
           <div class="side-stack">
-            <form class="social-panel" id="autoPostsForm">
+            <form class="social-panel is-hidden" id="autoPostsForm">
               <div class="panel-head">
                 <strong>auto posts</strong>
-                <span>saved templates</span>
+                <button class="mini-button" id="closeAutoPostsButton" type="button">Close</button>
               </div>
 
               <div class="auto-block">

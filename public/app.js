@@ -8,6 +8,7 @@ const state = {
 const elements = {
   autoPostsForm: document.querySelector("#autoPostsForm"),
   autoPostsToast: document.querySelector("#autoPostsToast"),
+  autoPostsButton: document.querySelector("#autoPostsButton"),
   autoTiktokDiscordChannel: document.querySelector("#autoTiktokDiscordChannel"),
   autoTiktokEnabled: document.querySelector("#autoTiktokEnabled"),
   autoTiktokMessage: document.querySelector("#autoTiktokMessage"),
@@ -26,6 +27,7 @@ const elements = {
   botStatus: document.querySelector("#botStatus"),
   buttonsInput: document.querySelector("#buttonsInput"),
   channelId: document.querySelector("#channelId"),
+  closeAutoPostsButton: document.querySelector("#closeAutoPostsButton"),
   deleteButton: document.querySelector("#deleteButton"),
   editorForm: document.querySelector("#editorForm"),
   embedColor: document.querySelector("#embedColor"),
@@ -99,7 +101,7 @@ const rulesTemplate = () => ({
       }
     ],
     buttons: [
-      { label: "Rules", url: "https://discord.com", emoji: "" },
+      { label: "Rules", action: "rules", emoji: "" },
       { label: "Roles", url: "https://discord.com", emoji: "" },
       { label: "Navigation", url: "https://discord.com", emoji: "" },
       { label: "ModMail", url: "https://discord.com", emoji: "" }
@@ -143,7 +145,9 @@ async function api(path, options = {}) {
 }
 
 function buttonsToText(buttons = []) {
-  return buttons.map((button) => [button.label, button.url, button.emoji].join(" | ")).join("\n");
+  return buttons
+    .map((button) => [button.label, button.action ? `action:${button.action}` : button.url, button.emoji].join(" | "))
+    .join("\n");
 }
 
 function textToButtons(value) {
@@ -152,8 +156,11 @@ function textToButtons(value) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [label = "", url = "", emoji = ""] = line.split("|").map((part) => part.trim());
-      return { label, url, emoji };
+      const [label = "", target = "", emoji = ""] = line.split("|").map((part) => part.trim());
+      if (target.toLowerCase().startsWith("action:")) {
+        return { label, action: target.slice("action:".length).trim().toLowerCase(), emoji };
+      }
+      return { label, url: target, emoji };
     });
 }
 
@@ -402,6 +409,15 @@ elements.newScriptButton.addEventListener("click", () => {
 elements.templateButton.addEventListener("click", () => {
   fillForm(rulesTemplate());
   setToast("");
+});
+
+elements.autoPostsButton.addEventListener("click", () => {
+  elements.autoPostsForm.classList.remove("is-hidden");
+  elements.autoPostsForm.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+elements.closeAutoPostsButton.addEventListener("click", () => {
+  elements.autoPostsForm.classList.add("is-hidden");
 });
 
 elements.autoPostsForm.addEventListener("submit", async (event) => {

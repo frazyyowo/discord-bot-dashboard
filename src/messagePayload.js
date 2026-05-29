@@ -47,17 +47,22 @@ function buildEmbed(embed) {
 
 function buildButtonRows(buttons = []) {
   const rows = [];
-  const validButtons = buttons.filter((button) => button.label && button.url).slice(0, 25);
+  const validButtons = buttons
+    .filter((button) => button.label && (button.url || button.action))
+    .slice(0, 25);
 
   for (let index = 0; index < validButtons.length; index += 5) {
     const row = new ActionRowBuilder();
     const chunk = validButtons.slice(index, index + 5);
 
     for (const button of chunk) {
-      const builder = new ButtonBuilder()
-        .setLabel(button.label)
-        .setStyle(ButtonStyle.Link)
-        .setURL(button.url);
+      const builder = new ButtonBuilder().setLabel(button.label);
+
+      if (button.action) {
+        builder.setCustomId(`frazbot:${button.action}`).setStyle(ButtonStyle.Primary);
+      } else {
+        builder.setStyle(ButtonStyle.Link).setURL(button.url);
+      }
 
       if (button.emoji) {
         builder.setEmoji(button.emoji);

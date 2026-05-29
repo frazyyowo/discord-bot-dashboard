@@ -50,12 +50,16 @@ function normalizeButtons(buttons = []) {
   }
 
   return buttons
-    .map((button) => ({
-      label: text(button.label, 80),
-      url: text(button.url, 512),
-      emoji: text(button.emoji, 64)
-    }))
-    .filter((button) => button.label && isUrl(button.url))
+    .map((button) => {
+      const action = text(button.action, 40).toLowerCase();
+      return {
+        label: text(button.label, 80),
+        url: text(button.url, 512),
+        action: action === "rules" ? action : "",
+        emoji: text(button.emoji, 64)
+      };
+    })
+    .filter((button) => button.label && (isUrl(button.url) || button.action))
     .slice(0, 25);
 }
 

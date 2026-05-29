@@ -49,6 +49,10 @@ button:disabled {
   opacity: 0.6;
 }
 
+.is-hidden {
+  display: none !important;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -242,6 +246,15 @@ label span,
 .panel-head span {
   color: var(--muted);
   font-size: 13px;
+}
+
+.mini-button {
+  background: #0e1017;
+  border: 1px solid var(--line);
+  color: var(--soft);
+  font-size: 12px;
+  min-height: 30px;
+  padding: 0 10px;
 }
 
 .auto-block {

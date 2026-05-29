@@ -29,11 +29,12 @@
       }
     ],
     "buttons": [
-      {
+        {
           "label": "Rules",
-        "url": "https://discord.com",
-        "emoji": ""
-      },
+          "url": "",
+          "action": "rules",
+          "emoji": ""
+        },
       {
           "label": "Roles",
         "url": "https://discord.com",
