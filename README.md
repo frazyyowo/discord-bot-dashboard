@@ -217,33 +217,19 @@ A script is JSON, but you normally edit it from the website:
 
 Buttons can either open a link or privately reply to the person who clicked.
 
-In the website `Buttons` box:
+In the website, use `Add button`.
 
-```text
-Rules | reply:rules |
-Roles | reply:roles |
-YouTube | https://youtube.com/@yourchannel |
-```
+For a private reply button, set `Type` to `Private reply` and set `Target` to a short ID like `rules`.
 
-In `Private button replies`:
+For a link button, set `Type` to `Link` and set `Target` to the full URL.
 
-```text
-rules | rules | read the rules and be cool.
-roles | roles | go to #roles and pick what fits.
-```
+Then use `Add reply` to make the private reply. Its `Reply ID` must match the button target, like `rules`.
 
-The part after `reply:` connects the button to the private reply. You can make any names you want, like `faq`, `modmail`, `links`, or `server-info`.
+You can make any IDs you want, like `faq`, `modmail`, `links`, or `server-info`.
 
 You can also add embeds. For the main message, click `Add embed` and fill the normal boxes. You can add multiple extra embeds without typing any weird divider format.
 
-In `Private reply embeds`, each line starts with the reply ID:
-
-```text
-rules | server rules | be respectful\nno spam\nuse the right channels | #A996FF |  | frazbot
-roles | roles | pick your roles in #roles | #57F287 |  | frazbot
-```
-
-Use `\n` inside these lines if you want line breaks inside an embed description.
+For private reply embeds, click `Add embed` under `Private reply embeds`. Set `Reply ID` to the same ID as the private reply, then fill the title, description, color, image, and footer.
 
 ## Mention Replies
 

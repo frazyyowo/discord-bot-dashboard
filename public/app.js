@@ -8,6 +8,9 @@ const state = {
 
 const elements = {
   addExtraEmbedButton: document.querySelector("#addExtraEmbedButton"),
+  addButtonCardButton: document.querySelector("#addButtonCardButton"),
+  addPrivateReplyButton: document.querySelector("#addPrivateReplyButton"),
+  addReplyEmbedButton: document.querySelector("#addReplyEmbedButton"),
   autoPostsForm: document.querySelector("#autoPostsForm"),
   autoPostsToast: document.querySelector("#autoPostsToast"),
   autoPostsButton: document.querySelector("#autoPostsButton"),
@@ -27,9 +30,7 @@ const elements = {
   autoYoutubeVodsEnabled: document.querySelector("#autoYoutubeVodsEnabled"),
   autoYoutubeVodsMessage: document.querySelector("#autoYoutubeVodsMessage"),
   botStatus: document.querySelector("#botStatus"),
-  buttonReplyEmbedsInput: document.querySelector("#buttonReplyEmbedsInput"),
-  buttonRepliesInput: document.querySelector("#buttonRepliesInput"),
-  buttonsInput: document.querySelector("#buttonsInput"),
+  buttonsList: document.querySelector("#buttonsList"),
   channelId: document.querySelector("#channelId"),
   closeAutoPostsButton: document.querySelector("#closeAutoPostsButton"),
   closeMentionRepliesButton: document.querySelector("#closeMentionRepliesButton"),
@@ -61,6 +62,8 @@ const elements = {
   scriptDescription: document.querySelector("#scriptDescription"),
   scriptList: document.querySelector("#scriptList"),
   scriptName: document.querySelector("#scriptName"),
+  privateRepliesList: document.querySelector("#privateRepliesList"),
+  replyEmbedsList: document.querySelector("#replyEmbedsList"),
   selectedScriptId: document.querySelector("#selectedScriptId"),
   sendButton: document.querySelector("#sendButton"),
   templateButton: document.querySelector("#templateButton"),
@@ -169,55 +172,135 @@ async function api(path, options = {}) {
   return data;
 }
 
-function buttonsToText(buttons = []) {
-  return buttons
-    .map((button) => [button.label, button.replyId ? `reply:${button.replyId}` : button.url, button.emoji].join(" | "))
-    .join("\n");
+function watchCardInputs(card) {
+  for (const input of card.querySelectorAll("input, select, textarea")) {
+    input.addEventListener("input", renderPreview);
+    input.addEventListener("change", renderPreview);
+  }
 }
 
-function textToButtons(value) {
-  return value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [label = "", target = "", emoji = ""] = line.split("|").map((part) => part.trim());
-      if (target.toLowerCase().startsWith("reply:")) {
-        return { label, replyId: target.slice("reply:".length).trim().toLowerCase(), emoji };
+function makeButtonCard(button = {}) {
+  const card = document.createElement("div");
+  card.className = "embed-card button-card";
+  card.innerHTML = `
+    <div class="embed-card-head">
+      <strong>Button</strong>
+      <button class="mini-button remove-button-card" type="button">Remove</button>
+    </div>
+    <div class="form-grid">
+      <label>
+        <span>Label</span>
+        <input class="button-label" type="text" maxlength="80" />
+      </label>
+      <label>
+        <span>Emoji</span>
+        <input class="button-emoji" type="text" maxlength="64" />
+      </label>
+    </div>
+    <div class="form-grid">
+      <label>
+        <span>Type</span>
+        <select class="button-kind">
+          <option value="reply">Private reply</option>
+          <option value="link">Link</option>
+        </select>
+      </label>
+      <label>
+        <span>Target</span>
+        <input class="button-target" type="text" maxlength="512" />
+      </label>
+    </div>
+  `;
+
+  const kind = button.url ? "link" : "reply";
+  card.querySelector(".button-label").value = button.label ?? "";
+  card.querySelector(".button-emoji").value = button.emoji ?? "";
+  card.querySelector(".button-kind").value = kind;
+  card.querySelector(".button-target").value = kind === "reply" ? button.replyId ?? "" : button.url ?? "";
+  card.querySelector(".remove-button-card").addEventListener("click", () => {
+    card.remove();
+    renderPreview();
+  });
+
+  watchCardInputs(card);
+  return card;
+}
+
+function renderButtonCards(buttons = []) {
+  elements.buttonsList.innerHTML = "";
+  for (const button of buttons) {
+    elements.buttonsList.append(makeButtonCard(button));
+  }
+}
+
+function collectButtonCards() {
+  return [...elements.buttonsList.querySelectorAll(".button-card")]
+    .map((card) => {
+      const label = card.querySelector(".button-label").value.trim();
+      const emoji = card.querySelector(".button-emoji").value.trim();
+      const kind = card.querySelector(".button-kind").value;
+      const target = card.querySelector(".button-target").value.trim();
+
+      if (kind === "reply") {
+        return { label, replyId: target.toLowerCase(), emoji };
       }
+
       return { label, url: target, emoji };
-    });
+    })
+    .filter((button) => button.label && (button.url || button.replyId));
 }
 
-function embedsToText(embeds = []) {
-  return embeds
-    .map((embed) =>
-      [embed.title, embed.description, embed.color, embed.image, embed.footer]
-        .map((part) => String(part ?? "").replace(/\r?\n/g, "\\n"))
-        .join(" | ")
-    )
-    .join("\n");
+function makePrivateReplyCard(reply = {}) {
+  const card = document.createElement("div");
+  card.className = "embed-card private-reply-card";
+  card.innerHTML = `
+    <div class="embed-card-head">
+      <strong>Private reply</strong>
+      <button class="mini-button remove-private-reply" type="button">Remove</button>
+    </div>
+    <div class="form-grid">
+      <label>
+        <span>Reply ID</span>
+        <input class="private-reply-id" type="text" maxlength="40" />
+      </label>
+      <label>
+        <span>Title</span>
+        <input class="private-reply-title" type="text" maxlength="80" />
+      </label>
+    </div>
+    <label>
+      <span>Message</span>
+      <textarea class="private-reply-content" rows="3" maxlength="1900"></textarea>
+    </label>
+  `;
+
+  card.querySelector(".private-reply-id").value = reply.id ?? "";
+  card.querySelector(".private-reply-title").value = reply.title ?? "";
+  card.querySelector(".private-reply-content").value = reply.content ?? "";
+  card.querySelector(".remove-private-reply").addEventListener("click", () => {
+    card.remove();
+    renderPreview();
+  });
+
+  watchCardInputs(card);
+  return card;
 }
 
-function textToEmbeds(value) {
-  return value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [title = "", description = "", color = "#a996ff", image = "", footer = ""] = line
-        .split("|")
-        .map((part) => part.trim().replaceAll("\\n", "\n"));
-      return {
-        title,
-        description,
-        color: color || "#a996ff",
-        image,
-        thumbnail: "",
-        footer,
-        fields: []
-      };
-    });
+function renderPrivateReplies(replies = []) {
+  elements.privateRepliesList.innerHTML = "";
+  for (const reply of replies) {
+    elements.privateRepliesList.append(makePrivateReplyCard(reply));
+  }
+}
+
+function collectPrivateReplies() {
+  return [...elements.privateRepliesList.querySelectorAll(".private-reply-card")]
+    .map((card) => ({
+      id: card.querySelector(".private-reply-id").value.trim().toLowerCase(),
+      title: card.querySelector(".private-reply-title").value.trim(),
+      content: card.querySelector(".private-reply-content").value.trim()
+    }))
+    .filter((reply) => reply.id);
 }
 
 function makeExtraEmbedCard(embed = {}) {
@@ -288,56 +371,82 @@ function collectExtraEmbeds() {
   }));
 }
 
-function repliesToText(replies = []) {
-  return replies.map((reply) => [reply.id, reply.title, reply.content].join(" | ")).join("\n");
+function makeReplyEmbedCard(row = {}) {
+  const embed = row.embed ?? {};
+  const card = document.createElement("div");
+  card.className = "embed-card reply-embed-card";
+  card.innerHTML = `
+    <div class="embed-card-head">
+      <strong>Reply embed</strong>
+      <button class="mini-button remove-reply-embed" type="button">Remove</button>
+    </div>
+    <label>
+      <span>Reply ID</span>
+      <input class="reply-embed-id" type="text" maxlength="40" />
+    </label>
+    <label>
+      <span>Title</span>
+      <input class="reply-embed-title" type="text" maxlength="256" />
+    </label>
+    <label>
+      <span>Description</span>
+      <textarea class="reply-embed-description" rows="3" maxlength="4096"></textarea>
+    </label>
+    <div class="form-grid">
+      <label>
+        <span>Accent</span>
+        <input class="reply-embed-color" type="color" />
+      </label>
+      <label>
+        <span>Image URL</span>
+        <input class="reply-embed-image" type="url" />
+      </label>
+    </div>
+    <label>
+      <span>Footer</span>
+      <input class="reply-embed-footer" type="text" maxlength="2048" />
+    </label>
+  `;
+
+  card.querySelector(".reply-embed-id").value = row.id ?? "";
+  card.querySelector(".reply-embed-title").value = embed.title ?? "";
+  card.querySelector(".reply-embed-description").value = embed.description ?? "";
+  card.querySelector(".reply-embed-color").value = embed.color ?? "#a996ff";
+  card.querySelector(".reply-embed-image").value = embed.image ?? "";
+  card.querySelector(".reply-embed-footer").value = embed.footer ?? "";
+  card.querySelector(".remove-reply-embed").addEventListener("click", () => {
+    card.remove();
+    renderPreview();
+  });
+
+  watchCardInputs(card);
+  return card;
 }
 
-function textToReplies(value) {
-  return value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [id = "", title = "", ...contentParts] = line.split("|").map((part) => part.trim());
-      return { id, title, content: contentParts.join(" | ") };
-    });
-}
-
-function replyEmbedsToText(replies = []) {
-  const lines = [];
+function renderReplyEmbeds(replies = []) {
+  elements.replyEmbedsList.innerHTML = "";
   for (const reply of replies) {
     for (const embed of reply.embeds ?? []) {
-      lines.push(
-        [reply.id, embed.title, embed.description, embed.color, embed.image, embed.footer]
-          .map((part) => String(part ?? "").replace(/\r?\n/g, "\\n"))
-          .join(" | ")
-      );
+      elements.replyEmbedsList.append(makeReplyEmbedCard({ id: reply.id, embed }));
     }
   }
-  return lines.join("\n");
 }
 
-function textToReplyEmbeds(value) {
-  return value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [id = "", title = "", description = "", color = "#a996ff", image = "", footer = ""] =
-        line.split("|").map((part) => part.trim().replaceAll("\\n", "\n"));
-      return {
-        id,
-        embed: {
-          title,
-          description,
-          color: color || "#a996ff",
-          image,
-          thumbnail: "",
-          footer,
-          fields: []
-        }
-      };
-    });
+function collectReplyEmbeds() {
+  return [...elements.replyEmbedsList.querySelectorAll(".reply-embed-card")]
+    .map((card) => ({
+      id: card.querySelector(".reply-embed-id").value.trim().toLowerCase(),
+      embed: {
+        title: card.querySelector(".reply-embed-title").value.trim(),
+        description: card.querySelector(".reply-embed-description").value.trim(),
+        color: card.querySelector(".reply-embed-color").value || "#a996ff",
+        image: card.querySelector(".reply-embed-image").value.trim(),
+        thumbnail: "",
+        footer: card.querySelector(".reply-embed-footer").value.trim(),
+        fields: []
+      }
+    }))
+    .filter((row) => row.id);
 }
 
 function mergeReplyEmbeds(replies, replyEmbeds) {
@@ -380,9 +489,9 @@ function fillForm(script) {
   elements.embedThumbnail.value = embed.thumbnail ?? "";
   elements.embedFooter.value = embed.footer ?? "";
   renderExtraEmbeds(embeds.slice(1));
-  elements.buttonsInput.value = buttonsToText(script.message?.buttons ?? []);
-  elements.buttonRepliesInput.value = repliesToText(script.message?.replies ?? []);
-  elements.buttonReplyEmbedsInput.value = replyEmbedsToText(script.message?.replies ?? []);
+  renderButtonCards(script.message?.buttons ?? []);
+  renderPrivateReplies(script.message?.replies ?? []);
+  renderReplyEmbeds(script.message?.replies ?? []);
   renderPreview();
   renderScriptList();
 }
@@ -406,11 +515,8 @@ function formToScript() {
     },
     ...collectExtraEmbeds()
   ];
-  script.message.buttons = textToButtons(elements.buttonsInput.value);
-  script.message.replies = mergeReplyEmbeds(
-    textToReplies(elements.buttonRepliesInput.value),
-    textToReplyEmbeds(elements.buttonReplyEmbedsInput.value)
-  );
+  script.message.buttons = collectButtonCards();
+  script.message.replies = mergeReplyEmbeds(collectPrivateReplies(), collectReplyEmbeds());
   return script;
 }
 
@@ -670,8 +776,20 @@ elements.templateButton.addEventListener("click", () => {
   setToast("");
 });
 
+elements.addButtonCardButton.addEventListener("click", () => {
+  elements.buttonsList.append(makeButtonCard({ replyId: "" }));
+});
+
+elements.addPrivateReplyButton.addEventListener("click", () => {
+  elements.privateRepliesList.append(makePrivateReplyCard({ id: "", title: "", content: "" }));
+});
+
 elements.addExtraEmbedButton.addEventListener("click", () => {
   elements.extraEmbedsList.append(makeExtraEmbedCard({ color: "#a996ff" }));
+});
+
+elements.addReplyEmbedButton.addEventListener("click", () => {
+  elements.replyEmbedsList.append(makeReplyEmbedCard({ id: "", embed: { color: "#a996ff" } }));
 });
 
 elements.autoPostsButton.addEventListener("click", () => {
