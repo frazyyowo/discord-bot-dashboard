@@ -82,28 +82,17 @@ function canManageGuild(interaction) {
   return interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild);
 }
 
-function rulesReplyFromScript(script) {
-  const embed = script?.message?.embeds?.[0] ?? {};
-  const lines = [];
-
-  if (embed.title) {
-    lines.push(`**${embed.title}**`);
-  }
-  if (embed.description) {
-    lines.push(embed.description);
-  }
-  if (Array.isArray(embed.fields)) {
-    for (const field of embed.fields) {
-      if (field.name && field.value) {
-        lines.push(`**${field.name}:** ${field.value}`);
-      }
+async function findButtonReply(storage, replyId) {
+  const scripts = await storage.listScripts();
+  for (const script of scripts) {
+    const replies = script.message?.replies ?? [];
+    const reply = replies.find((item) => item.id === replyId);
+    if (reply) {
+      return reply;
     }
   }
 
-  return (
-    lines.join("\n\n").trim() ||
-    "read the rules, grab roles, use navigation, and message mods if you need help."
-  ).slice(0, 1900);
+  return null;
 }
 
 export function createBot({ storage, config }) {
@@ -129,10 +118,11 @@ export function createBot({ storage, config }) {
 
   client.on("interactionCreate", async (interaction) => {
     try {
-      if (interaction.isButton() && interaction.customId === "frazbot:rules") {
-        const script = await storage.getScript("rules");
+      if (interaction.isButton() && interaction.customId.startsWith("frazbot:reply:")) {
+        const replyId = interaction.customId.slice("frazbot:reply:".length);
+        const reply = await findButtonReply(storage, replyId);
         await interaction.reply({
-          content: rulesReplyFromScript(script),
+          content: reply ? `${reply.title ? `**${reply.title}**\n` : ""}${reply.content}` : "That reply is not set up yet.",
           flags: MessageFlags.Ephemeral
         });
         return;

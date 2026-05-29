@@ -213,6 +213,27 @@ A script is JSON, but you normally edit it from the website:
 }
 ```
 
+## Private Button Replies
+
+Buttons can either open a link or privately reply to the person who clicked.
+
+In the website `Buttons` box:
+
+```text
+Rules | reply:rules |
+Roles | reply:roles |
+YouTube | https://youtube.com/@yourchannel |
+```
+
+In `Private button replies`:
+
+```text
+rules | rules | read the rules and be cool.
+roles | roles | go to #roles and pick what fits.
+```
+
+The part after `reply:` connects the button to the private reply. You can make any names you want, like `faq`, `modmail`, `links`, or `server-info`.
+
 ## Making It Mega Custom
 
 Good next modules:

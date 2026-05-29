@@ -48,7 +48,7 @@ function buildEmbed(embed) {
 function buildButtonRows(buttons = []) {
   const rows = [];
   const validButtons = buttons
-    .filter((button) => button.label && (button.url || button.action))
+    .filter((button) => button.label && (button.url || button.replyId))
     .slice(0, 25);
 
   for (let index = 0; index < validButtons.length; index += 5) {
@@ -58,8 +58,8 @@ function buildButtonRows(buttons = []) {
     for (const button of chunk) {
       const builder = new ButtonBuilder().setLabel(button.label);
 
-      if (button.action) {
-        builder.setCustomId(`frazbot:${button.action}`).setStyle(ButtonStyle.Primary);
+      if (button.replyId) {
+        builder.setCustomId(`frazbot:reply:${button.replyId}`).setStyle(ButtonStyle.Primary);
       } else {
         builder.setStyle(ButtonStyle.Link).setURL(button.url);
       }

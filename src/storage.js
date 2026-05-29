@@ -20,6 +20,10 @@ function slugify(value) {
     .slice(0, 64);
 }
 
+function replyId(value) {
+  return slugify(value).slice(0, 40);
+}
+
 function isUrl(value) {
   try {
     const url = new URL(String(value));
@@ -51,15 +55,30 @@ function normalizeButtons(buttons = []) {
 
   return buttons
     .map((button) => {
-      const action = text(button.action, 40).toLowerCase();
+      const id = replyId(button.replyId || button.action);
       return {
         label: text(button.label, 80),
         url: text(button.url, 512),
-        action: action === "rules" ? action : "",
+        replyId: id,
         emoji: text(button.emoji, 64)
       };
     })
-    .filter((button) => button.label && (isUrl(button.url) || button.action))
+    .filter((button) => button.label && (isUrl(button.url) || button.replyId))
+    .slice(0, 25);
+}
+
+function normalizeReplies(replies = []) {
+  if (!Array.isArray(replies)) {
+    return [];
+  }
+
+  return replies
+    .map((reply) => ({
+      id: replyId(reply.id),
+      title: text(reply.title, 80),
+      content: text(reply.content, 1900)
+    }))
+    .filter((reply) => reply.id && reply.content)
     .slice(0, 25);
 }
 
@@ -104,7 +123,8 @@ function normalizeScript(input = {}, existing = {}) {
     message: {
       content: text(inputMessage.content, 2000, existingMessage.content),
       embeds: embed ? [embed] : [],
-      buttons: normalizeButtons(inputMessage.buttons ?? existingMessage.buttons)
+      buttons: normalizeButtons(inputMessage.buttons ?? existingMessage.buttons),
+      replies: normalizeReplies(inputMessage.replies ?? existingMessage.replies)
     },
     createdAt: existing.createdAt ?? now,
     updatedAt: now

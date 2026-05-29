@@ -32,7 +32,7 @@
         {
           "label": "Rules",
           "url": "",
-          "action": "rules",
+          "replyId": "rules",
           "emoji": ""
         },
       {
@@ -49,6 +49,13 @@
         "label": "ModMail",
         "url": "https://discord.com",
         "emoji": ""
+      }
+    ],
+    "replies": [
+      {
+        "id": "rules",
+        "title": "rules",
+        "content": "read the rules, grab roles, use navigation, and message mods if you need help."
       }
     ]
   },

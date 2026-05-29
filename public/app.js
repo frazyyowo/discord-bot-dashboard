@@ -25,6 +25,7 @@ const elements = {
   autoYoutubeVodsEnabled: document.querySelector("#autoYoutubeVodsEnabled"),
   autoYoutubeVodsMessage: document.querySelector("#autoYoutubeVodsMessage"),
   botStatus: document.querySelector("#botStatus"),
+  buttonRepliesInput: document.querySelector("#buttonRepliesInput"),
   buttonsInput: document.querySelector("#buttonsInput"),
   channelId: document.querySelector("#channelId"),
   closeAutoPostsButton: document.querySelector("#closeAutoPostsButton"),
@@ -76,7 +77,8 @@ const blankScript = () => ({
         fields: []
       }
     ],
-    buttons: []
+    buttons: [],
+    replies: []
   }
 });
 
@@ -101,10 +103,17 @@ const rulesTemplate = () => ({
       }
     ],
     buttons: [
-      { label: "Rules", action: "rules", emoji: "" },
+      { label: "Rules", replyId: "rules", emoji: "" },
       { label: "Roles", url: "https://discord.com", emoji: "" },
       { label: "Navigation", url: "https://discord.com", emoji: "" },
       { label: "ModMail", url: "https://discord.com", emoji: "" }
+    ],
+    replies: [
+      {
+        id: "rules",
+        title: "rules",
+        content: "read the rules, grab roles, use navigation, and message mods if you need help."
+      }
     ]
   }
 });
@@ -146,7 +155,7 @@ async function api(path, options = {}) {
 
 function buttonsToText(buttons = []) {
   return buttons
-    .map((button) => [button.label, button.action ? `action:${button.action}` : button.url, button.emoji].join(" | "))
+    .map((button) => [button.label, button.replyId ? `reply:${button.replyId}` : button.url, button.emoji].join(" | "))
     .join("\n");
 }
 
@@ -157,10 +166,25 @@ function textToButtons(value) {
     .filter(Boolean)
     .map((line) => {
       const [label = "", target = "", emoji = ""] = line.split("|").map((part) => part.trim());
-      if (target.toLowerCase().startsWith("action:")) {
-        return { label, action: target.slice("action:".length).trim().toLowerCase(), emoji };
+      if (target.toLowerCase().startsWith("reply:")) {
+        return { label, replyId: target.slice("reply:".length).trim().toLowerCase(), emoji };
       }
       return { label, url: target, emoji };
+    });
+}
+
+function repliesToText(replies = []) {
+  return replies.map((reply) => [reply.id, reply.title, reply.content].join(" | ")).join("\n");
+}
+
+function textToReplies(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [id = "", title = "", ...contentParts] = line.split("|").map((part) => part.trim());
+      return { id, title, content: contentParts.join(" | ") };
     });
 }
 
@@ -183,6 +207,7 @@ function fillForm(script) {
   elements.embedThumbnail.value = embed.thumbnail ?? "";
   elements.embedFooter.value = embed.footer ?? "";
   elements.buttonsInput.value = buttonsToText(script.message?.buttons ?? []);
+  elements.buttonRepliesInput.value = repliesToText(script.message?.replies ?? []);
   renderPreview();
   renderScriptList();
 }
@@ -206,6 +231,7 @@ function formToScript() {
     }
   ];
   script.message.buttons = textToButtons(elements.buttonsInput.value);
+  script.message.replies = textToReplies(elements.buttonRepliesInput.value);
   return script;
 }
 
