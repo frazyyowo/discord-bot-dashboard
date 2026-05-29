@@ -1,0 +1,56 @@
+{
+  "id": "rules",
+  "name": "Rules Welcome Panel",
+  "description": "A polished server intro with rules, roles, navigation, and modmail buttons.",
+  "enabled": true,
+  "channelId": "",
+  "message": {
+    "content": "Welcome to your server\nThis community is built for members to hang out, share interests, and find everything fast.",
+    "embeds": [
+      {
+        "title": "Start Here",
+        "description": "Feel free to hang out with members, share interests, and become part of the community!\n\nBe sure to review the server rules, claim profile roles, navigate the community, and learn how to contact Moderators.",
+        "color": "#57F287",
+        "thumbnail": "",
+        "image": "",
+        "footer": "Server guide",
+        "fields": [
+          {
+            "name": "Vanity URL",
+            "value": "https://discord.gg/yourinvite",
+            "inline": true
+          },
+          {
+            "name": "Established",
+            "value": "2026",
+            "inline": true
+          }
+        ]
+      }
+    ],
+    "buttons": [
+      {
+        "label": "Server Rules",
+        "url": "https://discord.com",
+        "emoji": ""
+      },
+      {
+        "label": "Claim Roles",
+        "url": "https://discord.com",
+        "emoji": ""
+      },
+      {
+        "label": "Navigation",
+        "url": "https://discord.com",
+        "emoji": ""
+      },
+      {
+        "label": "ModMail",
+        "url": "https://discord.com",
+        "emoji": ""
+      }
+    ]
+  },
+  "createdAt": "2026-05-29T00:00:00.000Z",
+  "updatedAt": "2026-05-29T00:00:00.000Z"
+}

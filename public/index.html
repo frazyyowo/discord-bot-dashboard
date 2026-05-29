@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Discord Bot Studio</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">BS</div>
+          <div>
+            <strong>Bot Studio</strong>
+            <span>Message scripts</span>
+          </div>
+        </div>
+
+        <div class="sidebar-actions">
+          <button class="primary-button" id="newScriptButton" type="button">New</button>
+          <button class="ghost-button" id="templateButton" type="button">Rules Template</button>
+        </div>
+
+        <div class="script-list" id="scriptList"></div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <h1>Server Message Builder</h1>
+            <p>Build polished Discord panels, buttons, and embeds.</p>
+          </div>
+          <div class="topbar-tools">
+            <span class="status-pill" id="botStatus">Checking</span>
+            <div class="user-badge">
+              <img id="userAvatar" alt="" />
+              <span id="userName">Logged in</span>
+              <a href="/auth/logout">Logout</a>
+            </div>
+          </div>
+        </header>
+
+        <section class="workspace">
+          <form class="editor-panel" id="editorForm">
+            <div class="form-grid">
+              <label>
+                <span>Name</span>
+                <input id="scriptName" type="text" maxlength="80" required />
+              </label>
+              <label>
+                <span>Default channel ID</span>
+                <input id="channelId" type="text" inputmode="numeric" />
+              </label>
+            </div>
+
+            <label>
+              <span>Short note</span>
+              <input id="scriptDescription" type="text" maxlength="240" />
+            </label>
+
+            <label>
+              <span>Message content</span>
+              <textarea id="messageContent" rows="4" maxlength="2000"></textarea>
+            </label>
+
+            <div class="section-title">Embed</div>
+            <div class="form-grid">
+              <label>
+                <span>Title</span>
+                <input id="embedTitle" type="text" maxlength="256" />
+              </label>
+              <label>
+                <span>Accent</span>
+                <input id="embedColor" type="color" value="#5865f2" />
+              </label>
+            </div>
+
+            <label>
+              <span>Description</span>
+              <textarea id="embedDescription" rows="6" maxlength="4096"></textarea>
+            </label>
+
+            <div class="form-grid">
+              <label>
+                <span>Image URL</span>
+                <input id="embedImage" type="url" />
+              </label>
+              <label>
+                <span>Thumbnail URL</span>
+                <input id="embedThumbnail" type="url" />
+              </label>
+            </div>
+
+            <label>
+              <span>Footer</span>
+              <input id="embedFooter" type="text" maxlength="2048" />
+            </label>
+
+            <label>
+              <span>Buttons</span>
+              <textarea id="buttonsInput" rows="5" spellcheck="false"></textarea>
+            </label>
+
+            <div class="action-row">
+              <button class="primary-button" id="saveButton" type="submit">Save</button>
+              <button class="success-button" id="sendButton" type="button">Send</button>
+              <button class="danger-button" id="deleteButton" type="button">Delete</button>
+            </div>
+
+            <p class="toast" id="toast"></p>
+          </form>
+
+          <section class="preview-panel">
+            <div class="preview-toolbar">
+              <span>Preview</span>
+              <span id="selectedScriptId">unsaved</span>
+            </div>
+            <div class="discord-frame">
+              <div class="avatar">B</div>
+              <div class="discord-message">
+                <div class="message-meta">
+                  <strong>Server Bot</strong>
+                  <span>Today at 12:00</span>
+                </div>
+                <div class="message-content" id="previewContent"></div>
+                <div class="embed-preview" id="embedPreview">
+                  <div class="embed-title" id="previewEmbedTitle"></div>
+                  <div class="embed-description" id="previewEmbedDescription"></div>
+                  <img class="embed-image" id="previewEmbedImage" alt="" />
+                  <div class="embed-footer" id="previewEmbedFooter"></div>
+                </div>
+                <div class="button-preview" id="previewButtons"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
