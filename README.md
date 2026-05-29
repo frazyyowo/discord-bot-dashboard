@@ -13,6 +13,7 @@ Custom Discord bot plus a private web dashboard.
 - Rules panel in `data/scripts/rules.json`
 - Social post maker for Twitch, TikTok, Instagram, and X/Twitter links
 - Secret webhook endpoint for external automation tools
+- Twitch EventSub auto-post when your stream goes live
 
 ## Setup
 
@@ -60,6 +61,11 @@ Custom Discord bot plus a private web dashboard.
    PUBLIC_URL=http://localhost:3000
    AUTOMATION_SECRET=make-this-long-and-random
    SOCIAL_POST_CHANNEL_ID=your_announcement_channel_id
+   TWITCH_CLIENT_ID=your_twitch_app_client_id
+   TWITCH_CLIENT_SECRET=your_twitch_app_client_secret
+   TWITCH_CHANNEL_LOGIN=your_twitch_username
+   TWITCH_EVENTSUB_SECRET=make-this-random-too
+   TWITCH_LIVE_MESSAGE=@everyone live now
    PORT=3000
    ```
 
@@ -223,11 +229,40 @@ Good next modules:
 
 Keep the dashboard "scripts" as safe templates. Do not let random website text run as JavaScript inside your bot process. If you want custom code modules later, add them as trusted files in `src/modules`, review them, then restart the bot.
 
-## Social Post Maker
+## Automatic Social Posts
 
 The dashboard has a post maker for Twitch, TikTok, Instagram, and X/Twitter. Paste a post link, write the caption, set the channel ID, and send it.
 
-There is also an automation endpoint:
+For real automatic posting, a platform must send frazbot a webhook/event when something happens.
+
+### Twitch Auto Live Posts
+
+Twitch works directly with EventSub.
+
+In Render, set:
+
+```env
+TWITCH_CLIENT_ID=your_twitch_app_client_id
+TWITCH_CLIENT_SECRET=your_twitch_app_client_secret
+TWITCH_CHANNEL_LOGIN=your_twitch_username
+TWITCH_EVENTSUB_SECRET=make-this-random-too
+SOCIAL_POST_CHANNEL_ID=your_discord_announcement_channel_id
+TWITCH_LIVE_MESSAGE=@everyone live now
+```
+
+Then redeploy. On startup, frazbot creates a Twitch `stream.online` EventSub subscription. When the Twitch channel goes live, Twitch calls:
+
+```text
+https://your-domain.com/webhooks/twitch/eventsub
+```
+
+and frazbot posts in Discord.
+
+### TikTok, Instagram, X/Twitter
+
+These need platform access/app approval or an automation tool. The easiest beginner path is Make, Zapier, IFTTT, or another service that can detect a new post and call frazbot.
+
+Use this endpoint:
 
 ```text
 POST https://your-domain.com/webhooks/social
@@ -251,6 +286,12 @@ JSON body:
 ```
 
 This endpoint is meant for Make, Zapier, IFTTT, Twitch EventSub, TikTok webhooks, or your own scripts.
+
+Official docs:
+
+- Twitch EventSub: https://dev.twitch.tv/docs/eventsub/
+- TikTok webhooks: https://developers.tiktok.com/doc/webhooks-overview
+- X Account Activity API: https://docs.x.com/x-api/account-activity/introduction
 
 ## Official References
 

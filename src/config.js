@@ -55,6 +55,11 @@ export function getConfig() {
     port: Number.isFinite(parsedPort) ? parsedPort : 3000,
     publicUrl: process.env.PUBLIC_URL ?? "",
     publicDir: path.resolve(process.cwd(), "public"),
-    socialPostChannelId: process.env.SOCIAL_POST_CHANNEL_ID ?? ""
+    socialPostChannelId: process.env.SOCIAL_POST_CHANNEL_ID ?? "",
+    twitchChannelLogin: process.env.TWITCH_CHANNEL_LOGIN ?? "",
+    twitchClientId: process.env.TWITCH_CLIENT_ID ?? "",
+    twitchClientSecret: process.env.TWITCH_CLIENT_SECRET ?? "",
+    twitchEventSubSecret: process.env.TWITCH_EVENTSUB_SECRET ?? "",
+    twitchLiveMessage: process.env.TWITCH_LIVE_MESSAGE ?? ""
   };
 }

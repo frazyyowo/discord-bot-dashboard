@@ -50,6 +50,11 @@ Render is still the easiest free start. For a serious always-online bot, use a V
    PUBLIC_URL=https://panel.yourdomain.com
    AUTOMATION_SECRET=make-this-long-and-random
    SOCIAL_POST_CHANNEL_ID=your_announcement_channel_id
+   TWITCH_CLIENT_ID=your_twitch_app_client_id
+   TWITCH_CLIENT_SECRET=your_twitch_app_client_secret
+   TWITCH_CHANNEL_LOGIN=your_twitch_username
+   TWITCH_EVENTSUB_SECRET=make-this-random-too
+   TWITCH_LIVE_MESSAGE=@everyone live now
    ```
 
 5. Add your custom domain in Render:

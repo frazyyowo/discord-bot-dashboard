@@ -3,6 +3,7 @@ import http from "node:http";
 import path from "node:path";
 import { createAuth } from "./auth.js";
 import { buildSocialPostScript, listSocialPlatforms } from "./socialPost.js";
+import { handleTwitchEventSub } from "./twitchEventSub.js";
 
 const MIME_TYPES = {
   ".css": "text/css; charset=utf-8",
@@ -51,6 +52,25 @@ function readBody(request) {
   });
 }
 
+function readRawBody(request) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+
+    request.on("data", (chunk) => {
+      chunks.push(chunk);
+      if (Buffer.concat(chunks).length > 1_000_000) {
+        reject(new Error("Request body is too large."));
+      }
+    });
+
+    request.on("end", () => {
+      resolve(Buffer.concat(chunks).toString("utf8"));
+    });
+
+    request.on("error", reject);
+  });
+}
+
 async function serveStatic(request, response, url, config) {
   const pathname = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
   const filePath = path.resolve(config.publicDir, `.${pathname}`);
@@ -83,6 +103,17 @@ function requestAutomationSecret(request, url) {
 }
 
 async function handleWebhook(request, response, url, { bot, config }) {
+  if (url.pathname === "/webhooks/twitch/eventsub") {
+    if (request.method !== "POST") {
+      sendJson(response, 405, { error: "Method not allowed." });
+      return true;
+    }
+
+    const rawBody = await readRawBody(request);
+    await handleTwitchEventSub({ request, response, rawBody, bot, config });
+    return true;
+  }
+
   if (url.pathname !== "/webhooks/social") {
     return false;
   }
