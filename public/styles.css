@@ -264,6 +264,48 @@ label span,
   padding-top: 12px;
 }
 
+.repeat-section {
+  display: grid;
+  gap: 10px;
+}
+
+.repeat-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.repeat-title span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.embed-card-list {
+  display: grid;
+  gap: 10px;
+}
+
+.embed-card {
+  background: #101018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.embed-card-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.embed-card-head strong {
+  font-size: 14px;
+}
+
 .checkline {
   align-items: center;
   display: flex;

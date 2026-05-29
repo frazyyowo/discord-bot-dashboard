@@ -7,6 +7,7 @@ const state = {
 };
 
 const elements = {
+  addExtraEmbedButton: document.querySelector("#addExtraEmbedButton"),
   autoPostsForm: document.querySelector("#autoPostsForm"),
   autoPostsToast: document.querySelector("#autoPostsToast"),
   autoPostsButton: document.querySelector("#autoPostsButton"),
@@ -26,6 +27,7 @@ const elements = {
   autoYoutubeVodsEnabled: document.querySelector("#autoYoutubeVodsEnabled"),
   autoYoutubeVodsMessage: document.querySelector("#autoYoutubeVodsMessage"),
   botStatus: document.querySelector("#botStatus"),
+  buttonReplyEmbedsInput: document.querySelector("#buttonReplyEmbedsInput"),
   buttonRepliesInput: document.querySelector("#buttonRepliesInput"),
   buttonsInput: document.querySelector("#buttonsInput"),
   channelId: document.querySelector("#channelId"),
@@ -40,6 +42,7 @@ const elements = {
   embedPreview: document.querySelector("#embedPreview"),
   embedThumbnail: document.querySelector("#embedThumbnail"),
   embedTitle: document.querySelector("#embedTitle"),
+  extraEmbedsList: document.querySelector("#extraEmbedsList"),
   messageContent: document.querySelector("#messageContent"),
   mentionDefaultMessages: document.querySelector("#mentionDefaultMessages"),
   mentionRepliesButton: document.querySelector("#mentionRepliesButton"),
@@ -186,6 +189,105 @@ function textToButtons(value) {
     });
 }
 
+function embedsToText(embeds = []) {
+  return embeds
+    .map((embed) =>
+      [embed.title, embed.description, embed.color, embed.image, embed.footer]
+        .map((part) => String(part ?? "").replace(/\r?\n/g, "\\n"))
+        .join(" | ")
+    )
+    .join("\n");
+}
+
+function textToEmbeds(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [title = "", description = "", color = "#a996ff", image = "", footer = ""] = line
+        .split("|")
+        .map((part) => part.trim().replaceAll("\\n", "\n"));
+      return {
+        title,
+        description,
+        color: color || "#a996ff",
+        image,
+        thumbnail: "",
+        footer,
+        fields: []
+      };
+    });
+}
+
+function makeExtraEmbedCard(embed = {}) {
+  const card = document.createElement("div");
+  card.className = "embed-card extra-embed-card";
+  card.innerHTML = `
+    <div class="embed-card-head">
+      <strong>Embed</strong>
+      <button class="mini-button remove-extra-embed" type="button">Remove</button>
+    </div>
+    <label>
+      <span>Title</span>
+      <input class="extra-embed-title" type="text" maxlength="256" />
+    </label>
+    <label>
+      <span>Description</span>
+      <textarea class="extra-embed-description" rows="3" maxlength="4096"></textarea>
+    </label>
+    <div class="form-grid">
+      <label>
+        <span>Accent</span>
+        <input class="extra-embed-color" type="color" />
+      </label>
+      <label>
+        <span>Image URL</span>
+        <input class="extra-embed-image" type="url" />
+      </label>
+    </div>
+    <label>
+      <span>Footer</span>
+      <input class="extra-embed-footer" type="text" maxlength="2048" />
+    </label>
+  `;
+
+  card.querySelector(".extra-embed-title").value = embed.title ?? "";
+  card.querySelector(".extra-embed-description").value = embed.description ?? "";
+  card.querySelector(".extra-embed-color").value = embed.color ?? "#a996ff";
+  card.querySelector(".extra-embed-image").value = embed.image ?? "";
+  card.querySelector(".extra-embed-footer").value = embed.footer ?? "";
+  card.querySelector(".remove-extra-embed").addEventListener("click", () => {
+    card.remove();
+    renderPreview();
+  });
+
+  for (const input of card.querySelectorAll("input, textarea")) {
+    input.addEventListener("input", renderPreview);
+  }
+
+  return card;
+}
+
+function renderExtraEmbeds(embeds = []) {
+  elements.extraEmbedsList.innerHTML = "";
+  for (const embed of embeds) {
+    elements.extraEmbedsList.append(makeExtraEmbedCard(embed));
+  }
+}
+
+function collectExtraEmbeds() {
+  return [...elements.extraEmbedsList.querySelectorAll(".extra-embed-card")].map((card) => ({
+    title: card.querySelector(".extra-embed-title").value.trim(),
+    description: card.querySelector(".extra-embed-description").value.trim(),
+    color: card.querySelector(".extra-embed-color").value || "#a996ff",
+    image: card.querySelector(".extra-embed-image").value.trim(),
+    thumbnail: "",
+    footer: card.querySelector(".extra-embed-footer").value.trim(),
+    fields: []
+  }));
+}
+
 function repliesToText(replies = []) {
   return replies.map((reply) => [reply.id, reply.title, reply.content].join(" | ")).join("\n");
 }
@@ -201,11 +303,69 @@ function textToReplies(value) {
     });
 }
 
+function replyEmbedsToText(replies = []) {
+  const lines = [];
+  for (const reply of replies) {
+    for (const embed of reply.embeds ?? []) {
+      lines.push(
+        [reply.id, embed.title, embed.description, embed.color, embed.image, embed.footer]
+          .map((part) => String(part ?? "").replace(/\r?\n/g, "\\n"))
+          .join(" | ")
+      );
+    }
+  }
+  return lines.join("\n");
+}
+
+function textToReplyEmbeds(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [id = "", title = "", description = "", color = "#a996ff", image = "", footer = ""] =
+        line.split("|").map((part) => part.trim().replaceAll("\\n", "\n"));
+      return {
+        id,
+        embed: {
+          title,
+          description,
+          color: color || "#a996ff",
+          image,
+          thumbnail: "",
+          footer,
+          fields: []
+        }
+      };
+    });
+}
+
+function mergeReplyEmbeds(replies, replyEmbeds) {
+  const next = replies.map((reply) => ({ ...reply, embeds: [] }));
+
+  for (const row of replyEmbeds) {
+    if (!row.id) {
+      continue;
+    }
+
+    let reply = next.find((item) => item.id === row.id);
+    if (!reply) {
+      reply = { id: row.id, title: "", content: "", embeds: [] };
+      next.push(reply);
+    }
+
+    reply.embeds.push(row.embed);
+  }
+
+  return next;
+}
+
 function firstEmbed(script) {
   return script.message?.embeds?.[0] ?? blankScript().message.embeds[0];
 }
 
 function fillForm(script) {
+  const embeds = script.message?.embeds ?? [];
   const embed = firstEmbed(script);
   state.currentId = script.id || null;
   elements.selectedScriptId.textContent = state.currentId ?? "unsaved";
@@ -219,8 +379,10 @@ function fillForm(script) {
   elements.embedImage.value = embed.image ?? "";
   elements.embedThumbnail.value = embed.thumbnail ?? "";
   elements.embedFooter.value = embed.footer ?? "";
+  renderExtraEmbeds(embeds.slice(1));
   elements.buttonsInput.value = buttonsToText(script.message?.buttons ?? []);
   elements.buttonRepliesInput.value = repliesToText(script.message?.replies ?? []);
+  elements.buttonReplyEmbedsInput.value = replyEmbedsToText(script.message?.replies ?? []);
   renderPreview();
   renderScriptList();
 }
@@ -241,10 +403,14 @@ function formToScript() {
       thumbnail: elements.embedThumbnail.value.trim(),
       footer: elements.embedFooter.value.trim(),
       fields: []
-    }
+    },
+    ...collectExtraEmbeds()
   ];
   script.message.buttons = textToButtons(elements.buttonsInput.value);
-  script.message.replies = textToReplies(elements.buttonRepliesInput.value);
+  script.message.replies = mergeReplyEmbeds(
+    textToReplies(elements.buttonRepliesInput.value),
+    textToReplyEmbeds(elements.buttonReplyEmbedsInput.value)
+  );
   return script;
 }
 
@@ -502,6 +668,10 @@ elements.newScriptButton.addEventListener("click", () => {
 elements.templateButton.addEventListener("click", () => {
   fillForm(rulesTemplate());
   setToast("");
+});
+
+elements.addExtraEmbedButton.addEventListener("click", () => {
+  elements.extraEmbedsList.append(makeExtraEmbedCard({ color: "#a996ff" }));
 });
 
 elements.autoPostsButton.addEventListener("click", () => {

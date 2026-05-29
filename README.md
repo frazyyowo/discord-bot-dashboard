@@ -234,6 +234,17 @@ roles | roles | go to #roles and pick what fits.
 
 The part after `reply:` connects the button to the private reply. You can make any names you want, like `faq`, `modmail`, `links`, or `server-info`.
 
+You can also add embeds. For the main message, click `Add embed` and fill the normal boxes. You can add multiple extra embeds without typing any weird divider format.
+
+In `Private reply embeds`, each line starts with the reply ID:
+
+```text
+rules | server rules | be respectful\nno spam\nuse the right channels | #A996FF |  | frazbot
+roles | roles | pick your roles in #roles | #57F287 |  | frazbot
+```
+
+Use `\n` inside these lines if you want line breaks inside an embed description.
+
 ## Mention Replies
 
 The `Mention replies` panel controls what frazbot says when someone mentions the bot.

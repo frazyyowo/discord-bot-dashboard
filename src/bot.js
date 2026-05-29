@@ -8,7 +8,7 @@ import {
   Routes,
   SlashCommandBuilder
 } from "discord.js";
-import { buildDiscordPayload } from "./messagePayload.js";
+import { buildDiscordPayload, buildPrivateReplyPayload } from "./messagePayload.js";
 import { normalizeMentionReplies, pickMentionReply } from "./mentionReplies.js";
 
 export function buildCommands() {
@@ -127,7 +127,7 @@ export function createBot({ storage, config }) {
         const replyId = interaction.customId.slice("frazbot:reply:".length);
         const reply = await findButtonReply(storage, replyId);
         await interaction.reply({
-          content: reply ? `${reply.title ? `**${reply.title}**\n` : ""}${reply.content}` : "That reply is not set up yet.",
+          ...(reply ? buildPrivateReplyPayload(reply) : { content: "That reply is not set up yet." }),
           flags: MessageFlags.Ephemeral
         });
         return;

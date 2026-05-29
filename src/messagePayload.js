@@ -96,3 +96,20 @@ export function buildDiscordPayload(script) {
 
   return payload;
 }
+
+export function buildPrivateReplyPayload(reply) {
+  const embeds = Array.isArray(reply.embeds) ? reply.embeds.map(buildEmbed) : [];
+  const content = [reply.title ? `**${reply.title}**` : "", reply.content || ""]
+    .filter(Boolean)
+    .join("\n")
+    .slice(0, 2000);
+
+  if (!content && embeds.length === 0) {
+    return { content: "That reply is empty." };
+  }
+
+  return {
+    content: content || undefined,
+    embeds
+  };
+}

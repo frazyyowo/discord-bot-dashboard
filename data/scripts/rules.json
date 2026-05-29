@@ -55,7 +55,18 @@
       {
         "id": "rules",
         "title": "rules",
-        "content": "read the rules, grab roles, use navigation, and message mods if you need help."
+        "content": "read the rules, grab roles, use navigation, and message mods if you need help.",
+        "embeds": [
+          {
+            "title": "server rules",
+            "description": "be respectful\nno spam\nuse the right channels",
+            "color": "#A996FF",
+            "thumbnail": "",
+            "image": "",
+            "footer": "frazbot",
+            "fields": []
+          }
+        ]
       }
     ]
   },

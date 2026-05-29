@@ -77,9 +77,10 @@ function normalizeReplies(replies = []) {
     .map((reply) => ({
       id: replyId(reply.id),
       title: text(reply.title, 80),
-      content: text(reply.content, 1900)
+      content: text(reply.content, 1900),
+      embeds: normalizeEmbeds(reply.embeds)
     }))
-    .filter((reply) => reply.id && reply.content)
+    .filter((reply) => reply.id && (reply.content || reply.embeds.length > 0))
     .slice(0, 25);
 }
 
@@ -106,13 +107,21 @@ function normalizeEmbed(embed = {}) {
   return hasContent ? normalized : null;
 }
 
+function normalizeEmbeds(embeds = []) {
+  if (!Array.isArray(embeds)) {
+    return [];
+  }
+
+  return embeds.map(normalizeEmbed).filter(Boolean).slice(0, 10);
+}
+
 function normalizeScript(input = {}, existing = {}) {
   const now = new Date().toISOString();
   const existingMessage = existing.message ?? {};
   const inputMessage = input.message ?? {};
   const inputEmbeds = Array.isArray(inputMessage.embeds) ? inputMessage.embeds : [];
   const existingEmbeds = Array.isArray(existingMessage.embeds) ? existingMessage.embeds : [];
-  const embed = normalizeEmbed(inputEmbeds[0] ?? existingEmbeds[0] ?? {});
+  const embeds = normalizeEmbeds(inputEmbeds.length > 0 ? inputEmbeds : existingEmbeds);
   const id = slugify(input.id || existing.id || input.name) || `script-${randomUUID().slice(0, 8)}`;
 
   return {
@@ -123,7 +132,7 @@ function normalizeScript(input = {}, existing = {}) {
     channelId: text(input.channelId, 64, existing.channelId),
     message: {
       content: text(inputMessage.content, 2000, existingMessage.content),
-      embeds: embed ? [embed] : [],
+      embeds,
       buttons: normalizeButtons(inputMessage.buttons ?? existingMessage.buttons),
       replies: normalizeReplies(inputMessage.replies ?? existingMessage.replies)
     },
