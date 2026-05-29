@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const SCRIPTS_DIR = path.join(DATA_DIR, "scripts");
 const AUTO_POSTS_FILE = path.join(DATA_DIR, "auto-posts.json");
+const MENTION_REPLIES_FILE = path.join(DATA_DIR, "mention-replies.json");
 
 function text(value, maxLength, fallback = "") {
   const next = String(value ?? fallback).trim();
@@ -165,6 +166,24 @@ export function createStorage() {
     async saveAutoPosts(settings) {
       await this.ensureStorage();
       await fs.writeFile(AUTO_POSTS_FILE, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+      return settings;
+    },
+
+    async getMentionReplies() {
+      await this.ensureStorage();
+      try {
+        return await readJsonFile(MENTION_REPLIES_FILE);
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          return {};
+        }
+        throw error;
+      }
+    },
+
+    async saveMentionReplies(settings) {
+      await this.ensureStorage();
+      await fs.writeFile(MENTION_REPLIES_FILE, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
       return settings;
     },
 

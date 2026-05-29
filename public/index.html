@@ -21,6 +21,7 @@
           <button class="primary-button" id="newScriptButton" type="button">New</button>
           <button class="ghost-button" id="templateButton" type="button">Rules</button>
           <button class="ghost-button" id="autoPostsButton" type="button">Auto posts</button>
+          <button class="ghost-button" id="mentionRepliesButton" type="button">Mention replies</button>
         </div>
 
         <div class="script-list" id="scriptList"></div>
@@ -202,6 +203,33 @@
 
               <button class="success-button" id="saveAutoPostsButton" type="submit">Save auto posts</button>
               <p class="toast" id="autoPostsToast"></p>
+            </form>
+
+            <form class="social-panel is-hidden" id="mentionRepliesForm">
+              <div class="panel-head">
+                <strong>mention replies</strong>
+                <button class="mini-button" id="closeMentionRepliesButton" type="button">Close</button>
+              </div>
+
+              <label class="checkline">
+                <input id="mentionRepliesEnabled" type="checkbox" />
+                <span>Reply when mentioned</span>
+              </label>
+
+              <label>
+                <span>Default random messages</span>
+                <textarea id="mentionDefaultMessages" rows="4" spellcheck="false"></textarea>
+              </label>
+
+              <label>
+                <span>Member custom replies</span>
+                <textarea id="mentionUserReplies" rows="8" spellcheck="false"></textarea>
+              </label>
+
+              <button class="success-button" id="saveMentionRepliesButton" type="submit">
+                Save mention replies
+              </button>
+              <p class="toast" id="mentionRepliesToast"></p>
             </form>
 
             <section class="preview-panel">

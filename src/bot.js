@@ -9,6 +9,7 @@ import {
   SlashCommandBuilder
 } from "discord.js";
 import { buildDiscordPayload } from "./messagePayload.js";
+import { normalizeMentionReplies, pickMentionReply } from "./mentionReplies.js";
 
 export function buildCommands() {
   const command = new SlashCommandBuilder()
@@ -113,7 +114,11 @@ export function createBot({ storage, config }) {
       return;
     }
 
-    await message.reply("meow :3");
+    const settings = normalizeMentionReplies(await storage.getMentionReplies());
+    const reply = pickMentionReply(settings, message.author.id);
+    if (reply) {
+      await message.reply(reply);
+    }
   });
 
   client.on("interactionCreate", async (interaction) => {

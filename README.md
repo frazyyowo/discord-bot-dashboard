@@ -234,6 +234,27 @@ roles | roles | go to #roles and pick what fits.
 
 The part after `reply:` connects the button to the private reply. You can make any names you want, like `faq`, `modmail`, `links`, or `server-info`.
 
+## Mention Replies
+
+The `Mention replies` panel controls what frazbot says when someone mentions the bot.
+
+Default random messages are one per line:
+
+```text
+meow :3
+mrrp :3
+haiii :3
+```
+
+Member custom replies use Discord user IDs:
+
+```text
+123456789012345678 | hii bestie / meowww :3 / omg hello
+987654321098765432 | yo / hello there / beep
+```
+
+If a user has custom replies, frazbot randomly picks from their messages. Everyone else gets the default random messages.
+
 ## Making It Mega Custom
 
 Good next modules:

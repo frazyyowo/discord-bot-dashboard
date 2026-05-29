@@ -1,6 +1,7 @@
 const state = {
   autoPosts: null,
   currentId: null,
+  mentionReplies: null,
   scripts: [],
   user: null
 };
@@ -29,6 +30,7 @@ const elements = {
   buttonsInput: document.querySelector("#buttonsInput"),
   channelId: document.querySelector("#channelId"),
   closeAutoPostsButton: document.querySelector("#closeAutoPostsButton"),
+  closeMentionRepliesButton: document.querySelector("#closeMentionRepliesButton"),
   deleteButton: document.querySelector("#deleteButton"),
   editorForm: document.querySelector("#editorForm"),
   embedColor: document.querySelector("#embedColor"),
@@ -39,6 +41,12 @@ const elements = {
   embedThumbnail: document.querySelector("#embedThumbnail"),
   embedTitle: document.querySelector("#embedTitle"),
   messageContent: document.querySelector("#messageContent"),
+  mentionDefaultMessages: document.querySelector("#mentionDefaultMessages"),
+  mentionRepliesButton: document.querySelector("#mentionRepliesButton"),
+  mentionRepliesEnabled: document.querySelector("#mentionRepliesEnabled"),
+  mentionRepliesForm: document.querySelector("#mentionRepliesForm"),
+  mentionRepliesToast: document.querySelector("#mentionRepliesToast"),
+  mentionUserReplies: document.querySelector("#mentionUserReplies"),
   newScriptButton: document.querySelector("#newScriptButton"),
   previewButtons: document.querySelector("#previewButtons"),
   previewContent: document.querySelector("#previewContent"),
@@ -126,6 +134,11 @@ function setToast(message, isError = false) {
 function setAutoPostsToast(message, isError = false) {
   elements.autoPostsToast.textContent = message;
   elements.autoPostsToast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
+}
+
+function setMentionRepliesToast(message, isError = false) {
+  elements.mentionRepliesToast.textContent = message;
+  elements.mentionRepliesToast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
 }
 
 async function api(path, options = {}) {
@@ -362,6 +375,60 @@ async function loadAutoPosts() {
   }
 }
 
+function messagesToText(messages = []) {
+  return messages.join("\n");
+}
+
+function textToMessages(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function usersToText(users = []) {
+  return users.map((user) => `${user.userId} | ${user.messages.join(" / ")}`).join("\n");
+}
+
+function textToUsers(value) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [userId = "", messages = ""] = line.split("|").map((part) => part.trim());
+      return {
+        userId,
+        messages: messages
+          .split("/")
+          .map((message) => message.trim())
+          .filter(Boolean)
+      };
+    });
+}
+
+function fillMentionReplies(settings) {
+  state.mentionReplies = settings;
+  elements.mentionRepliesEnabled.checked = settings.enabled;
+  elements.mentionDefaultMessages.value = messagesToText(settings.defaultMessages);
+  elements.mentionUserReplies.value = usersToText(settings.users);
+}
+
+function collectMentionReplies() {
+  return {
+    enabled: elements.mentionRepliesEnabled.checked,
+    defaultMessages: textToMessages(elements.mentionDefaultMessages.value),
+    users: textToUsers(elements.mentionUserReplies.value)
+  };
+}
+
+async function loadMentionReplies() {
+  const data = await api("/mention-replies");
+  if (data) {
+    fillMentionReplies(data.settings);
+  }
+}
+
 async function refreshHealth() {
   try {
     const health = await api("/health");
@@ -446,6 +513,15 @@ elements.closeAutoPostsButton.addEventListener("click", () => {
   elements.autoPostsForm.classList.add("is-hidden");
 });
 
+elements.mentionRepliesButton.addEventListener("click", () => {
+  elements.mentionRepliesForm.classList.remove("is-hidden");
+  elements.mentionRepliesForm.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+elements.closeMentionRepliesButton.addEventListener("click", () => {
+  elements.mentionRepliesForm.classList.add("is-hidden");
+});
+
 elements.autoPostsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
@@ -460,6 +536,20 @@ elements.autoPostsForm.addEventListener("submit", async (event) => {
   }
 });
 
+elements.mentionRepliesForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    const data = await api("/mention-replies", {
+      method: "PUT",
+      body: JSON.stringify(collectMentionReplies())
+    });
+    fillMentionReplies(data.settings);
+    setMentionRepliesToast("Saved.");
+  } catch (error) {
+    setMentionRepliesToast(error.message, true);
+  }
+});
+
 for (const input of elements.editorForm.querySelectorAll("input, textarea")) {
   input.addEventListener("input", renderPreview);
 }
@@ -468,4 +558,5 @@ await loadMe();
 await refreshHealth();
 await loadScripts();
 await loadAutoPosts();
+await loadMentionReplies();
 setInterval(refreshHealth, 5000);

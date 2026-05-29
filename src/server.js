@@ -3,6 +3,7 @@ import http from "node:http";
 import path from "node:path";
 import { buildAutoPostScript, normalizeAutoPosts } from "./autoPosts.js";
 import { createAuth } from "./auth.js";
+import { normalizeMentionReplies } from "./mentionReplies.js";
 import { listSocialPlatforms } from "./socialPost.js";
 import { handleTwitchEventSub } from "./twitchEventSub.js";
 
@@ -236,6 +237,21 @@ async function handleApi(request, response, url, { storage, bot, config, auth, a
   if (request.method === "PUT" && resource === "auto-posts") {
     const body = await readBody(request);
     sendJson(response, 200, { settings: await autoPostManager.saveSettings(body) });
+    return;
+  }
+
+  if (request.method === "GET" && resource === "mention-replies") {
+    sendJson(response, 200, {
+      settings: normalizeMentionReplies(await storage.getMentionReplies())
+    });
+    return;
+  }
+
+  if (request.method === "PUT" && resource === "mention-replies") {
+    const body = await readBody(request);
+    const settings = normalizeMentionReplies(body);
+    await storage.saveMentionReplies(settings);
+    sendJson(response, 200, { settings });
     return;
   }
 

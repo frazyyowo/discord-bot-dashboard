@@ -3,4 +3,5 @@ node_modules/
 npm-debug.log*
 data/*.tmp
 data/auto-posts.json
+data/mention-replies.json
 server.*.log
