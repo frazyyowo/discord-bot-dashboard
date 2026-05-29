@@ -34,6 +34,11 @@ function isUrl(value) {
   }
 }
 
+function safeUrl(value, maxLength = 512) {
+  const next = text(value, maxLength);
+  return isUrl(next) ? next : "";
+}
+
 function normalizeFields(fields = []) {
   if (!Array.isArray(fields)) {
     return [];
@@ -78,9 +83,10 @@ function normalizeReplies(replies = []) {
       id: replyId(reply.id),
       title: text(reply.title, 80),
       content: text(reply.content, 1900),
+      imageUrl: safeUrl(reply.imageUrl),
       embeds: normalizeEmbeds(reply.embeds)
     }))
-    .filter((reply) => reply.id && (reply.content || reply.embeds.length > 0))
+    .filter((reply) => reply.id && (reply.content || reply.imageUrl || reply.embeds.length > 0))
     .slice(0, 25);
 }
 
@@ -132,6 +138,7 @@ function normalizeScript(input = {}, existing = {}) {
     channelId: text(input.channelId, 64, existing.channelId),
     message: {
       content: text(inputMessage.content, 2000, existingMessage.content),
+      imageUrl: safeUrl(inputMessage.imageUrl ?? existingMessage.imageUrl),
       embeds,
       buttons: normalizeButtons(inputMessage.buttons ?? existingMessage.buttons),
       replies: normalizeReplies(inputMessage.replies ?? existingMessage.replies)

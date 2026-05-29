@@ -70,6 +70,11 @@
               <textarea id="messageContent" rows="4" maxlength="2000"></textarea>
             </label>
 
+            <label>
+              <span>Message image URL</span>
+              <input id="messageImage" type="url" />
+            </label>
+
             <div class="section-title">Embed</div>
             <div class="form-grid">
               <label>
@@ -267,6 +272,7 @@
                     <span>Today</span>
                   </div>
                   <div class="message-content" id="previewContent"></div>
+                  <img class="message-image" id="previewMessageImage" alt="" />
                   <div class="embed-preview" id="embedPreview">
                     <div class="embed-title" id="previewEmbedTitle"></div>
                     <div class="embed-description" id="previewEmbedDescription"></div>

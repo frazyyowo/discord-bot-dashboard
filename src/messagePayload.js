@@ -77,21 +77,30 @@ function buildButtonRows(buttons = []) {
   return rows;
 }
 
+function buildImageFiles(imageUrl) {
+  return imageUrl ? [{ attachment: imageUrl }] : [];
+}
+
 export function buildDiscordPayload(script) {
   const message = script.message ?? {};
   const embeds = Array.isArray(message.embeds) ? message.embeds.map(buildEmbed) : [];
   const components = buildButtonRows(message.buttons);
+  const files = buildImageFiles(message.imageUrl);
   const payload = {
     content: message.content || undefined,
     embeds
   };
 
+  if (files.length > 0) {
+    payload.files = files;
+  }
+
   if (components.length > 0) {
     payload.components = components;
   }
 
-  if (!payload.content && embeds.length === 0) {
-    throw new Error(`Script "${script.name}" has no message content or embed content.`);
+  if (!payload.content && embeds.length === 0 && files.length === 0) {
+    throw new Error(`Script "${script.name}" has no message content, image, or embed content.`);
   }
 
   return payload;
@@ -99,17 +108,24 @@ export function buildDiscordPayload(script) {
 
 export function buildPrivateReplyPayload(reply) {
   const embeds = Array.isArray(reply.embeds) ? reply.embeds.map(buildEmbed) : [];
+  const files = buildImageFiles(reply.imageUrl);
   const content = [reply.title ? `**${reply.title}**` : "", reply.content || ""]
     .filter(Boolean)
     .join("\n")
     .slice(0, 2000);
 
-  if (!content && embeds.length === 0) {
+  if (!content && embeds.length === 0 && files.length === 0) {
     return { content: "That reply is empty." };
   }
 
-  return {
+  const payload = {
     content: content || undefined,
     embeds
   };
+
+  if (files.length > 0) {
+    payload.files = files;
+  }
+
+  return payload;
 }

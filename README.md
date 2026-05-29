@@ -193,6 +193,7 @@ A script is JSON, but you normally edit it from the website:
   "channelId": "123456789012345678",
   "message": {
     "content": "Welcome to the server",
+    "imageUrl": "https://example.com/image.png",
     "embeds": [
       {
         "title": "Start Here",
@@ -217,6 +218,8 @@ A script is JSON, but you normally edit it from the website:
 
 Buttons can either open a link or privately reply to the person who clicked.
 
+The main message can also send a normal image without using an embed. Paste an image link into `Message image URL`.
+
 In the website, use `Add button`.
 
 For a private reply button, set `Type` to `Private reply` and set `Target` to a short ID like `rules`.
@@ -226,6 +229,8 @@ For a link button, set `Type` to `Link` and set `Target` to the full URL.
 Then use `Add reply` to make the private reply. Its `Reply ID` must match the button target, like `rules`.
 
 You can make any IDs you want, like `faq`, `modmail`, `links`, or `server-info`.
+
+Private replies can also have a normal image URL, separate from embeds.
 
 You can also add embeds. For the main message, click `Add embed` and fill the normal boxes. You can add multiple extra embeds without typing any weird divider format.
 

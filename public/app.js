@@ -45,6 +45,7 @@ const elements = {
   embedTitle: document.querySelector("#embedTitle"),
   extraEmbedsList: document.querySelector("#extraEmbedsList"),
   messageContent: document.querySelector("#messageContent"),
+  messageImage: document.querySelector("#messageImage"),
   mentionDefaultMessages: document.querySelector("#mentionDefaultMessages"),
   mentionRepliesButton: document.querySelector("#mentionRepliesButton"),
   mentionRepliesEnabled: document.querySelector("#mentionRepliesEnabled"),
@@ -58,6 +59,7 @@ const elements = {
   previewEmbedFooter: document.querySelector("#previewEmbedFooter"),
   previewEmbedImage: document.querySelector("#previewEmbedImage"),
   previewEmbedTitle: document.querySelector("#previewEmbedTitle"),
+  previewMessageImage: document.querySelector("#previewMessageImage"),
   saveButton: document.querySelector("#saveButton"),
   scriptDescription: document.querySelector("#scriptDescription"),
   scriptList: document.querySelector("#scriptList"),
@@ -80,6 +82,7 @@ const blankScript = () => ({
   channelId: "",
   message: {
     content: "",
+    imageUrl: "",
     embeds: [
       {
         title: "",
@@ -104,6 +107,7 @@ const rulesTemplate = () => ({
   message: {
     content:
       "welcome to the server\nhang out, post stuff, and be cool.",
+    imageUrl: "",
     embeds: [
       {
         title: "start here",
@@ -126,7 +130,8 @@ const rulesTemplate = () => ({
       {
         id: "rules",
         title: "rules",
-        content: "read the rules, grab roles, use navigation, and message mods if you need help."
+        content: "read the rules, grab roles, use navigation, and message mods if you need help.",
+        imageUrl: ""
       }
     ]
   }
@@ -272,11 +277,16 @@ function makePrivateReplyCard(reply = {}) {
       <span>Message</span>
       <textarea class="private-reply-content" rows="3" maxlength="1900"></textarea>
     </label>
+    <label>
+      <span>Image URL</span>
+      <input class="private-reply-image" type="url" />
+    </label>
   `;
 
   card.querySelector(".private-reply-id").value = reply.id ?? "";
   card.querySelector(".private-reply-title").value = reply.title ?? "";
   card.querySelector(".private-reply-content").value = reply.content ?? "";
+  card.querySelector(".private-reply-image").value = reply.imageUrl ?? "";
   card.querySelector(".remove-private-reply").addEventListener("click", () => {
     card.remove();
     renderPreview();
@@ -298,7 +308,8 @@ function collectPrivateReplies() {
     .map((card) => ({
       id: card.querySelector(".private-reply-id").value.trim().toLowerCase(),
       title: card.querySelector(".private-reply-title").value.trim(),
-      content: card.querySelector(".private-reply-content").value.trim()
+      content: card.querySelector(".private-reply-content").value.trim(),
+      imageUrl: card.querySelector(".private-reply-image").value.trim()
     }))
     .filter((reply) => reply.id);
 }
@@ -482,6 +493,7 @@ function fillForm(script) {
   elements.scriptDescription.value = script.description ?? "";
   elements.channelId.value = script.channelId ?? "";
   elements.messageContent.value = script.message?.content ?? "";
+  elements.messageImage.value = script.message?.imageUrl ?? "";
   elements.embedTitle.value = embed.title ?? "";
   elements.embedDescription.value = embed.description ?? "";
   elements.embedColor.value = embed.color ?? "#5865f2";
@@ -503,6 +515,7 @@ function formToScript() {
   script.description = elements.scriptDescription.value.trim();
   script.channelId = elements.channelId.value.trim();
   script.message.content = elements.messageContent.value.trim();
+  script.message.imageUrl = elements.messageImage.value.trim();
   script.message.embeds = [
     {
       title: elements.embedTitle.value.trim(),
@@ -550,6 +563,7 @@ function renderPreview() {
   const script = formToScript();
   const embed = firstEmbed(script);
   elements.previewContent.textContent = script.message.content;
+  elements.previewMessageImage.src = script.message.imageUrl;
   elements.previewEmbedTitle.textContent = embed.title;
   elements.previewEmbedDescription.textContent = embed.description;
   elements.previewEmbedFooter.textContent = embed.footer;
@@ -781,7 +795,7 @@ elements.addButtonCardButton.addEventListener("click", () => {
 });
 
 elements.addPrivateReplyButton.addEventListener("click", () => {
-  elements.privateRepliesList.append(makePrivateReplyCard({ id: "", title: "", content: "" }));
+  elements.privateRepliesList.append(makePrivateReplyCard({ id: "", title: "", content: "", imageUrl: "" }));
 });
 
 elements.addExtraEmbedButton.addEventListener("click", () => {

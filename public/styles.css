@@ -456,6 +456,20 @@ input[type="color"] {
   display: none;
 }
 
+.message-image {
+  border-radius: 6px;
+  display: block;
+  margin-top: 10px;
+  max-height: 320px;
+  max-width: 520px;
+  object-fit: cover;
+  width: auto;
+}
+
+.message-image[src=""] {
+  display: none;
+}
+
 .embed-preview {
   background: #2b2d31;
   border-left: 4px solid var(--blue);
