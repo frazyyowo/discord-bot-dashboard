@@ -28,9 +28,5 @@ services:
         sync: false
       - key: TWITCH_CLIENT_SECRET
         sync: false
-      - key: TWITCH_CHANNEL_LOGIN
-        sync: false
       - key: TWITCH_EVENTSUB_SECRET
-        sync: false
-      - key: TWITCH_LIVE_MESSAGE
         sync: false

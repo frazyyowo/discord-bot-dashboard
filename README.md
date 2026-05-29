@@ -11,7 +11,7 @@ Custom Discord bot plus a private web dashboard.
 - Discord user ID allow-list
 - Script files stored in `data/scripts/*.json`
 - Rules panel in `data/scripts/rules.json`
-- Social post maker for Twitch, TikTok, Instagram, and X/Twitter links
+- Auto post settings for Twitch, TikTok, YouTube, and YouTube VODs
 - Secret webhook endpoint for external automation tools
 - Twitch EventSub auto-post when your stream goes live
 
@@ -229,9 +229,23 @@ Good next modules:
 
 Keep the dashboard "scripts" as safe templates. Do not let random website text run as JavaScript inside your bot process. If you want custom code modules later, add them as trusted files in `src/modules`, review them, then restart the bot.
 
-## Automatic Social Posts
+## Automatic Posts
 
-The dashboard has a post maker for Twitch, TikTok, Instagram, and X/Twitter. Paste a post link, write the caption, set the channel ID, and send it.
+The dashboard has an `auto posts` settings panel. It saves custom message templates for:
+
+- Twitch
+- YouTube
+- YouTube VODs
+- TikTok
+
+Template words:
+
+```text
+{{title}}
+{{url}}
+{{channel}}
+{{platform}}
+```
 
 For real automatic posting, a platform must send frazbot a webhook/event when something happens.
 
@@ -239,18 +253,17 @@ For real automatic posting, a platform must send frazbot a webhook/event when so
 
 Twitch works directly with EventSub.
 
-In Render, set:
+In Render, keep these Twitch secrets set:
 
 ```env
 TWITCH_CLIENT_ID=your_twitch_app_client_id
 TWITCH_CLIENT_SECRET=your_twitch_app_client_secret
-TWITCH_CHANNEL_LOGIN=your_twitch_username
 TWITCH_EVENTSUB_SECRET=make-this-random-too
-SOCIAL_POST_CHANNEL_ID=your_discord_announcement_channel_id
-TWITCH_LIVE_MESSAGE=@everyone live now
 ```
 
-Then redeploy. On startup, frazbot creates a Twitch `stream.online` EventSub subscription. When the Twitch channel goes live, Twitch calls:
+Then use the website `auto posts` panel to set your Twitch login, Discord channel ID, and live message.
+
+On startup, frazbot creates a Twitch `stream.online` EventSub subscription. When the Twitch channel goes live, Twitch calls:
 
 ```text
 https://your-domain.com/webhooks/twitch/eventsub
@@ -258,9 +271,18 @@ https://your-domain.com/webhooks/twitch/eventsub
 
 and frazbot posts in Discord.
 
-### TikTok, Instagram, X/Twitter
+### YouTube Main And YouTube VODs
 
-These need platform access/app approval or an automation tool. The easiest beginner path is Make, Zapier, IFTTT, or another service that can detect a new post and call frazbot.
+YouTube is automatic through the public channel feed. In the website, put each YouTube channel ID into the matching auto-post card:
+
+- Main channel goes in `YouTube`
+- VODs channel goes in `YouTube VODs`
+
+frazbot checks for new videos every 10 minutes while it is awake.
+
+### TikTok
+
+TikTok does not give normal accounts a simple public feed like YouTube. The auto-post card is still there for the message template, but TikTok needs a webhook trigger from TikTok developer webhooks or a tool like Make/Zapier/IFTTT.
 
 Use this endpoint:
 
@@ -285,7 +307,7 @@ JSON body:
 }
 ```
 
-This endpoint is meant for Make, Zapier, IFTTT, Twitch EventSub, TikTok webhooks, or your own scripts.
+This endpoint is meant for TikTok webhooks, Make, Zapier, IFTTT, or your own scripts.
 
 Official docs:
 

@@ -43,6 +43,14 @@ function verifyTwitchSignature(request, rawBody, secret) {
   return secureEqual(signature, hmac(secret, messageId, timestamp, rawBody));
 }
 
+function fillTemplate(template, data) {
+  return String(template || "")
+    .replaceAll("{{platform}}", data.platform ?? "")
+    .replaceAll("{{title}}", data.title ?? "")
+    .replaceAll("{{url}}", data.url ?? "")
+    .replaceAll("{{channel}}", data.channel ?? "");
+}
+
 async function getAppAccessToken(config) {
   const body = new URLSearchParams({
     client_id: config.twitchClientId,
@@ -178,7 +186,13 @@ export async function handleTwitchEventSub({ request, response, rawBody, bot, co
   if (messageType === "notification" && body.subscription?.type === "stream.online") {
     const channel = text(body.event?.broadcaster_user_login || config.twitchChannelLogin, 80);
     const postUrl = `https://twitch.tv/${channel}`;
-    const caption = text(config.twitchLiveMessage, 1500) || `@everyone ${channel} is live`;
+    const caption =
+      fillTemplate(text(config.twitchLiveMessage, 1500), {
+        platform: "twitch",
+        title: "live",
+        url: postUrl,
+        channel
+      }) || `@everyone ${channel} is live`;
     const script = buildSocialPostScript(
       {
         platform: "twitch",

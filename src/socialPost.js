@@ -11,6 +11,12 @@ const PLATFORM_STYLES = {
     title: "new TikTok",
     button: "Open TikTok"
   },
+  youtube: {
+    label: "YouTube",
+    color: "#FF0033",
+    title: "new YouTube video",
+    button: "Watch video"
+  },
   instagram: {
     label: "Instagram",
     color: "#E1306C",

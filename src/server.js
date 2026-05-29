@@ -1,8 +1,9 @@
 import { promises as fs } from "node:fs";
 import http from "node:http";
 import path from "node:path";
+import { buildAutoPostScript, normalizeAutoPosts } from "./autoPosts.js";
 import { createAuth } from "./auth.js";
-import { buildSocialPostScript, listSocialPlatforms } from "./socialPost.js";
+import { listSocialPlatforms } from "./socialPost.js";
 import { handleTwitchEventSub } from "./twitchEventSub.js";
 
 const MIME_TYPES = {
@@ -102,7 +103,7 @@ function requestAutomationSecret(request, url) {
   return request.headers["x-automation-secret"] ?? url.searchParams.get("secret") ?? "";
 }
 
-async function handleWebhook(request, response, url, { bot, config }) {
+async function handleWebhook(request, response, url, { bot, config, storage }) {
   if (url.pathname === "/webhooks/twitch/eventsub") {
     if (request.method !== "POST") {
       sendJson(response, 405, { error: "Method not allowed." });
@@ -110,7 +111,25 @@ async function handleWebhook(request, response, url, { bot, config }) {
     }
 
     const rawBody = await readRawBody(request);
-    await handleTwitchEventSub({ request, response, rawBody, bot, config });
+    const autoPosts = normalizeAutoPosts(await storage.getAutoPosts());
+    if (!autoPosts.twitch.enabled) {
+      response.writeHead(204);
+      response.end();
+      return true;
+    }
+
+    await handleTwitchEventSub({
+      request,
+      response,
+      rawBody,
+      bot,
+      config: {
+        ...config,
+        socialPostChannelId: autoPosts.twitch.discordChannelId || config.socialPostChannelId,
+        twitchChannelLogin: autoPosts.twitch.channelLogin || config.twitchChannelLogin,
+        twitchLiveMessage: autoPosts.twitch.message || config.twitchLiveMessage
+      }
+    });
     return true;
   }
 
@@ -134,7 +153,23 @@ async function handleWebhook(request, response, url, { bot, config }) {
   }
 
   const body = await readBody(request);
-  const script = buildSocialPostScript(body, config.socialPostChannelId);
+  const autoPosts = normalizeAutoPosts(await storage.getAutoPosts());
+  const key = body.platform === "tiktok" ? "tiktok" : "tiktok";
+  if (!autoPosts[key].enabled) {
+    sendJson(response, 409, { error: "This automatic post source is disabled." });
+    return true;
+  }
+
+  const script = buildAutoPostScript(
+    key,
+    {
+      title: body.title || body.caption || "new post",
+      url: body.postUrl || body.url,
+      channel: body.channel || body.username || "TikTok"
+    },
+    autoPosts,
+    config.socialPostChannelId
+  );
   const sent = await bot.sendScript(script, script.channelId);
   sendJson(response, 200, {
     ok: true,
@@ -162,7 +197,7 @@ function requireApiAuth(request, response, auth) {
   return session;
 }
 
-async function handleApi(request, response, url, { storage, bot, config, auth }) {
+async function handleApi(request, response, url, { storage, bot, config, auth, autoPostManager }) {
   const segments = url.pathname.split("/").filter(Boolean);
   const resource = segments[1];
   const id = segments[2];
@@ -190,6 +225,17 @@ async function handleApi(request, response, url, { storage, bot, config, auth })
 
   if (request.method === "GET" && resource === "social-platforms") {
     sendJson(response, 200, { platforms: listSocialPlatforms() });
+    return;
+  }
+
+  if (request.method === "GET" && resource === "auto-posts") {
+    sendJson(response, 200, { settings: await autoPostManager.getSettings() });
+    return;
+  }
+
+  if (request.method === "PUT" && resource === "auto-posts") {
+    const body = await readBody(request);
+    sendJson(response, 200, { settings: await autoPostManager.saveSettings(body) });
     return;
   }
 
@@ -267,7 +313,7 @@ async function handleApi(request, response, url, { storage, bot, config, auth })
   sendJson(response, 405, { error: "Method not allowed." });
 }
 
-export function createDashboardServer({ storage, bot, config }) {
+export function createDashboardServer({ storage, bot, config, autoPostManager }) {
   const auth = createAuth(config);
   const publicPaths = new Set(["/login.html", "/styles.css"]);
 
@@ -278,12 +324,12 @@ export function createDashboardServer({ storage, bot, config }) {
         return;
       }
 
-      if (await handleWebhook(request, response, url, { bot, config })) {
+      if (await handleWebhook(request, response, url, { bot, config, storage })) {
         return;
       }
 
       if (url.pathname.startsWith("/api/")) {
-        await handleApi(request, response, url, { storage, bot, config, auth });
+        await handleApi(request, response, url, { storage, bot, config, auth, autoPostManager });
         return;
       }
 

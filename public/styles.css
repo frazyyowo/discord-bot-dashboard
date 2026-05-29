@@ -244,6 +244,32 @@ label span,
   font-size: 13px;
 }
 
+.auto-block {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.checkline {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 9px;
+}
+
+.checkline input {
+  accent-color: var(--blue);
+  height: 16px;
+  width: 16px;
+}
+
+.checkline span {
+  color: var(--text);
+  font-size: 14px;
+  text-transform: none;
+}
+
 .preview-panel {
   overflow: hidden;
 }

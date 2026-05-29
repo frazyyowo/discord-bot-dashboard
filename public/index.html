@@ -116,36 +116,86 @@
           </form>
 
           <div class="side-stack">
-            <form class="social-panel" id="socialForm">
+            <form class="social-panel" id="autoPostsForm">
               <div class="panel-head">
-                <strong>post maker</strong>
-                <span>social alerts</span>
+                <strong>auto posts</strong>
+                <span>saved templates</span>
               </div>
-              <div class="form-grid">
+
+              <div class="auto-block">
+                <label class="checkline">
+                  <input id="autoTwitchEnabled" type="checkbox" />
+                  <span>Twitch</span>
+                </label>
                 <label>
-                  <span>Platform</span>
-                  <select id="socialPlatform">
-                    <option value="twitch">Twitch</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="twitter">X / Twitter</option>
-                  </select>
+                  <span>Twitch login</span>
+                  <input id="autoTwitchLogin" type="text" />
                 </label>
                 <label>
                   <span>Channel ID</span>
-                  <input id="socialChannelId" type="text" inputmode="numeric" />
+                  <input id="autoTwitchDiscordChannel" type="text" inputmode="numeric" />
+                </label>
+                <label>
+                  <span>Message</span>
+                  <textarea id="autoTwitchMessage" rows="3"></textarea>
                 </label>
               </div>
-              <label>
-                <span>Post link</span>
-                <input id="socialPostUrl" type="url" />
-              </label>
-              <label>
-                <span>Caption</span>
-                <textarea id="socialCaption" rows="3" maxlength="1500"></textarea>
-              </label>
-              <button class="success-button" id="sendSocialButton" type="submit">Send post</button>
-              <p class="toast" id="socialToast"></p>
+
+              <div class="auto-block">
+                <label class="checkline">
+                  <input id="autoYoutubeMainEnabled" type="checkbox" />
+                  <span>YouTube</span>
+                </label>
+                <label>
+                  <span>Channel ID</span>
+                  <input id="autoYoutubeMainChannel" type="text" />
+                </label>
+                <label>
+                  <span>Discord channel</span>
+                  <input id="autoYoutubeMainDiscordChannel" type="text" inputmode="numeric" />
+                </label>
+                <label>
+                  <span>Message</span>
+                  <textarea id="autoYoutubeMainMessage" rows="3"></textarea>
+                </label>
+              </div>
+
+              <div class="auto-block">
+                <label class="checkline">
+                  <input id="autoYoutubeVodsEnabled" type="checkbox" />
+                  <span>YouTube VODs</span>
+                </label>
+                <label>
+                  <span>Channel ID</span>
+                  <input id="autoYoutubeVodsChannel" type="text" />
+                </label>
+                <label>
+                  <span>Discord channel</span>
+                  <input id="autoYoutubeVodsDiscordChannel" type="text" inputmode="numeric" />
+                </label>
+                <label>
+                  <span>Message</span>
+                  <textarea id="autoYoutubeVodsMessage" rows="3"></textarea>
+                </label>
+              </div>
+
+              <div class="auto-block">
+                <label class="checkline">
+                  <input id="autoTiktokEnabled" type="checkbox" />
+                  <span>TikTok</span>
+                </label>
+                <label>
+                  <span>Discord channel</span>
+                  <input id="autoTiktokDiscordChannel" type="text" inputmode="numeric" />
+                </label>
+                <label>
+                  <span>Message</span>
+                  <textarea id="autoTiktokMessage" rows="3"></textarea>
+                </label>
+              </div>
+
+              <button class="success-button" id="saveAutoPostsButton" type="submit">Save auto posts</button>
+              <p class="toast" id="autoPostsToast"></p>
             </form>
 
             <section class="preview-panel">

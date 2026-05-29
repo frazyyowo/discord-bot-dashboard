@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 
 const DATA_DIR = path.resolve(process.cwd(), "data");
 const SCRIPTS_DIR = path.join(DATA_DIR, "scripts");
+const AUTO_POSTS_FILE = path.join(DATA_DIR, "auto-posts.json");
 
 function text(value, maxLength, fallback = "") {
   const next = String(value ?? fallback).trim();
@@ -123,6 +124,24 @@ export function createStorage() {
   return {
     async ensureStorage() {
       await fs.mkdir(SCRIPTS_DIR, { recursive: true });
+    },
+
+    async getAutoPosts() {
+      await this.ensureStorage();
+      try {
+        return await readJsonFile(AUTO_POSTS_FILE);
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          return {};
+        }
+        throw error;
+      }
+    },
+
+    async saveAutoPosts(settings) {
+      await this.ensureStorage();
+      await fs.writeFile(AUTO_POSTS_FILE, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+      return settings;
     },
 
     async listScripts() {

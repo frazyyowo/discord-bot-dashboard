@@ -1,10 +1,28 @@
 const state = {
+  autoPosts: null,
   currentId: null,
   scripts: [],
   user: null
 };
 
 const elements = {
+  autoPostsForm: document.querySelector("#autoPostsForm"),
+  autoPostsToast: document.querySelector("#autoPostsToast"),
+  autoTiktokDiscordChannel: document.querySelector("#autoTiktokDiscordChannel"),
+  autoTiktokEnabled: document.querySelector("#autoTiktokEnabled"),
+  autoTiktokMessage: document.querySelector("#autoTiktokMessage"),
+  autoTwitchDiscordChannel: document.querySelector("#autoTwitchDiscordChannel"),
+  autoTwitchEnabled: document.querySelector("#autoTwitchEnabled"),
+  autoTwitchLogin: document.querySelector("#autoTwitchLogin"),
+  autoTwitchMessage: document.querySelector("#autoTwitchMessage"),
+  autoYoutubeMainChannel: document.querySelector("#autoYoutubeMainChannel"),
+  autoYoutubeMainDiscordChannel: document.querySelector("#autoYoutubeMainDiscordChannel"),
+  autoYoutubeMainEnabled: document.querySelector("#autoYoutubeMainEnabled"),
+  autoYoutubeMainMessage: document.querySelector("#autoYoutubeMainMessage"),
+  autoYoutubeVodsChannel: document.querySelector("#autoYoutubeVodsChannel"),
+  autoYoutubeVodsDiscordChannel: document.querySelector("#autoYoutubeVodsDiscordChannel"),
+  autoYoutubeVodsEnabled: document.querySelector("#autoYoutubeVodsEnabled"),
+  autoYoutubeVodsMessage: document.querySelector("#autoYoutubeVodsMessage"),
   botStatus: document.querySelector("#botStatus"),
   buttonsInput: document.querySelector("#buttonsInput"),
   channelId: document.querySelector("#channelId"),
@@ -31,13 +49,6 @@ const elements = {
   scriptName: document.querySelector("#scriptName"),
   selectedScriptId: document.querySelector("#selectedScriptId"),
   sendButton: document.querySelector("#sendButton"),
-  sendSocialButton: document.querySelector("#sendSocialButton"),
-  socialCaption: document.querySelector("#socialCaption"),
-  socialChannelId: document.querySelector("#socialChannelId"),
-  socialForm: document.querySelector("#socialForm"),
-  socialPlatform: document.querySelector("#socialPlatform"),
-  socialPostUrl: document.querySelector("#socialPostUrl"),
-  socialToast: document.querySelector("#socialToast"),
   templateButton: document.querySelector("#templateButton"),
   toast: document.querySelector("#toast"),
   userAvatar: document.querySelector("#userAvatar"),
@@ -101,9 +112,9 @@ function setToast(message, isError = false) {
   elements.toast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
 }
 
-function setSocialToast(message, isError = false) {
-  elements.socialToast.textContent = message;
-  elements.socialToast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
+function setAutoPostsToast(message, isError = false) {
+  elements.autoPostsToast.textContent = message;
+  elements.autoPostsToast.style.color = isError ? "#ffaaaa" : "#aeb4c7";
 }
 
 async function api(path, options = {}) {
@@ -259,6 +270,65 @@ async function loadScripts() {
   }
 }
 
+function fillAutoPosts(settings) {
+  state.autoPosts = settings;
+  elements.autoTwitchEnabled.checked = settings.twitch.enabled;
+  elements.autoTwitchLogin.value = settings.twitch.channelLogin;
+  elements.autoTwitchDiscordChannel.value = settings.twitch.discordChannelId;
+  elements.autoTwitchMessage.value = settings.twitch.message;
+
+  elements.autoYoutubeMainEnabled.checked = settings.youtubeMain.enabled;
+  elements.autoYoutubeMainChannel.value = settings.youtubeMain.channelId;
+  elements.autoYoutubeMainDiscordChannel.value = settings.youtubeMain.discordChannelId;
+  elements.autoYoutubeMainMessage.value = settings.youtubeMain.message;
+
+  elements.autoYoutubeVodsEnabled.checked = settings.youtubeVods.enabled;
+  elements.autoYoutubeVodsChannel.value = settings.youtubeVods.channelId;
+  elements.autoYoutubeVodsDiscordChannel.value = settings.youtubeVods.discordChannelId;
+  elements.autoYoutubeVodsMessage.value = settings.youtubeVods.message;
+
+  elements.autoTiktokEnabled.checked = settings.tiktok.enabled;
+  elements.autoTiktokDiscordChannel.value = settings.tiktok.discordChannelId;
+  elements.autoTiktokMessage.value = settings.tiktok.message;
+}
+
+function collectAutoPosts() {
+  return {
+    twitch: {
+      enabled: elements.autoTwitchEnabled.checked,
+      channelLogin: elements.autoTwitchLogin.value.trim(),
+      discordChannelId: elements.autoTwitchDiscordChannel.value.trim(),
+      message: elements.autoTwitchMessage.value.trim()
+    },
+    youtubeMain: {
+      enabled: elements.autoYoutubeMainEnabled.checked,
+      channelId: elements.autoYoutubeMainChannel.value.trim(),
+      discordChannelId: elements.autoYoutubeMainDiscordChannel.value.trim(),
+      lastVideoId: state.autoPosts?.youtubeMain?.lastVideoId ?? "",
+      message: elements.autoYoutubeMainMessage.value.trim()
+    },
+    youtubeVods: {
+      enabled: elements.autoYoutubeVodsEnabled.checked,
+      channelId: elements.autoYoutubeVodsChannel.value.trim(),
+      discordChannelId: elements.autoYoutubeVodsDiscordChannel.value.trim(),
+      lastVideoId: state.autoPosts?.youtubeVods?.lastVideoId ?? "",
+      message: elements.autoYoutubeVodsMessage.value.trim()
+    },
+    tiktok: {
+      enabled: elements.autoTiktokEnabled.checked,
+      discordChannelId: elements.autoTiktokDiscordChannel.value.trim(),
+      message: elements.autoTiktokMessage.value.trim()
+    }
+  };
+}
+
+async function loadAutoPosts() {
+  const data = await api("/auto-posts");
+  if (data) {
+    fillAutoPosts(data.settings);
+  }
+}
+
 async function refreshHealth() {
   try {
     const health = await api("/health");
@@ -334,23 +404,17 @@ elements.templateButton.addEventListener("click", () => {
   setToast("");
 });
 
-elements.socialForm.addEventListener("submit", async (event) => {
+elements.autoPostsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
-    const data = await api("/social-post", {
-      method: "POST",
-      body: JSON.stringify({
-        platform: elements.socialPlatform.value,
-        postUrl: elements.socialPostUrl.value.trim(),
-        caption: elements.socialCaption.value.trim(),
-        channelId: elements.socialChannelId.value.trim() || elements.channelId.value.trim()
-      })
+    const data = await api("/auto-posts", {
+      method: "PUT",
+      body: JSON.stringify(collectAutoPosts())
     });
-    if (data) {
-      setSocialToast(`Sent ${data.messageId}.`);
-    }
+    fillAutoPosts(data.settings);
+    setAutoPostsToast("Saved.");
   } catch (error) {
-    setSocialToast(error.message, true);
+    setAutoPostsToast(error.message, true);
   }
 });
 
@@ -361,4 +425,5 @@ for (const input of elements.editorForm.querySelectorAll("input, textarea")) {
 await loadMe();
 await refreshHealth();
 await loadScripts();
+await loadAutoPosts();
 setInterval(refreshHealth, 5000);
