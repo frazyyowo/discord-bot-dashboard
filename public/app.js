@@ -6,6 +6,10 @@ const state = {
   user: null
 };
 
+const AUTO_POSTS_DRAFT_KEY = "frazbot:autoPostsDraft:v1";
+const EDITOR_DRAFT_KEY = "frazbot:editorDraft:v1";
+const MENTION_REPLIES_DRAFT_KEY = "frazbot:mentionRepliesDraft:v1";
+
 const elements = {
   addExtraEmbedButton: document.querySelector("#addExtraEmbedButton"),
   addButtonCardButton: document.querySelector("#addButtonCardButton"),
@@ -177,10 +181,54 @@ async function api(path, options = {}) {
   return data;
 }
 
+function saveLocalDraft(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value }));
+  } catch {
+    // Browser storage can be blocked or full. The website still works without drafts.
+  }
+}
+
+function loadLocalDraft(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw).value : null;
+  } catch {
+    return null;
+  }
+}
+
+function removeLocalDraft(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors.
+  }
+}
+
+function saveEditorDraft() {
+  saveLocalDraft(EDITOR_DRAFT_KEY, formToScript());
+}
+
+function restoreEditorDraft() {
+  const script = loadLocalDraft(EDITOR_DRAFT_KEY);
+  if (!script) {
+    return;
+  }
+
+  fillForm(script);
+  setToast("Restored browser draft. Press Save when it looks right.");
+}
+
+function renderAndSaveDraft() {
+  renderPreview();
+  saveEditorDraft();
+}
+
 function watchCardInputs(card) {
   for (const input of card.querySelectorAll("input, select, textarea")) {
-    input.addEventListener("input", renderPreview);
-    input.addEventListener("change", renderPreview);
+    input.addEventListener("input", renderAndSaveDraft);
+    input.addEventListener("change", renderAndSaveDraft);
   }
 }
 
@@ -224,7 +272,7 @@ function makeButtonCard(button = {}) {
   card.querySelector(".button-target").value = kind === "reply" ? button.replyId ?? "" : button.url ?? "";
   card.querySelector(".remove-button-card").addEventListener("click", () => {
     card.remove();
-    renderPreview();
+    renderAndSaveDraft();
   });
 
   watchCardInputs(card);
@@ -289,7 +337,7 @@ function makePrivateReplyCard(reply = {}) {
   card.querySelector(".private-reply-image").value = reply.imageUrl ?? "";
   card.querySelector(".remove-private-reply").addEventListener("click", () => {
     card.remove();
-    renderPreview();
+    renderAndSaveDraft();
   });
 
   watchCardInputs(card);
@@ -353,12 +401,10 @@ function makeExtraEmbedCard(embed = {}) {
   card.querySelector(".extra-embed-footer").value = embed.footer ?? "";
   card.querySelector(".remove-extra-embed").addEventListener("click", () => {
     card.remove();
-    renderPreview();
+    renderAndSaveDraft();
   });
 
-  for (const input of card.querySelectorAll("input, textarea")) {
-    input.addEventListener("input", renderPreview);
-  }
+  watchCardInputs(card);
 
   return card;
 }
@@ -427,7 +473,7 @@ function makeReplyEmbedCard(row = {}) {
   card.querySelector(".reply-embed-footer").value = embed.footer ?? "";
   card.querySelector(".remove-reply-embed").addEventListener("click", () => {
     card.remove();
-    renderPreview();
+    renderAndSaveDraft();
   });
 
   watchCardInputs(card);
@@ -654,6 +700,17 @@ function collectAutoPosts() {
   };
 }
 
+function saveAutoPostsDraft() {
+  saveLocalDraft(AUTO_POSTS_DRAFT_KEY, collectAutoPosts());
+}
+
+function restoreAutoPostsDraft() {
+  const settings = loadLocalDraft(AUTO_POSTS_DRAFT_KEY);
+  if (settings) {
+    fillAutoPosts(settings);
+  }
+}
+
 async function loadAutoPosts() {
   const data = await api("/auto-posts");
   if (data) {
@@ -708,6 +765,17 @@ function collectMentionReplies() {
   };
 }
 
+function saveMentionRepliesDraft() {
+  saveLocalDraft(MENTION_REPLIES_DRAFT_KEY, collectMentionReplies());
+}
+
+function restoreMentionRepliesDraft() {
+  const settings = loadLocalDraft(MENTION_REPLIES_DRAFT_KEY);
+  if (settings) {
+    fillMentionReplies(settings);
+  }
+}
+
 async function loadMentionReplies() {
   const data = await api("/mention-replies");
   if (data) {
@@ -738,6 +806,7 @@ async function saveCurrent() {
   state.currentId = data.script.id;
   await loadScripts();
   fillForm(data.script);
+  saveEditorDraft();
   return data.script;
 }
 
@@ -773,6 +842,7 @@ elements.deleteButton.addEventListener("click", async () => {
   try {
     await api(`/scripts/${state.currentId}`, { method: "DELETE" });
     state.currentId = null;
+    removeLocalDraft(EDITOR_DRAFT_KEY);
     await loadScripts();
     setToast("Deleted.");
   } catch (error) {
@@ -792,18 +862,22 @@ elements.templateButton.addEventListener("click", () => {
 
 elements.addButtonCardButton.addEventListener("click", () => {
   elements.buttonsList.append(makeButtonCard({ replyId: "" }));
+  renderAndSaveDraft();
 });
 
 elements.addPrivateReplyButton.addEventListener("click", () => {
   elements.privateRepliesList.append(makePrivateReplyCard({ id: "", title: "", content: "", imageUrl: "" }));
+  renderAndSaveDraft();
 });
 
 elements.addExtraEmbedButton.addEventListener("click", () => {
   elements.extraEmbedsList.append(makeExtraEmbedCard({ color: "#a996ff" }));
+  renderAndSaveDraft();
 });
 
 elements.addReplyEmbedButton.addEventListener("click", () => {
   elements.replyEmbedsList.append(makeReplyEmbedCard({ id: "", embed: { color: "#a996ff" } }));
+  renderAndSaveDraft();
 });
 
 elements.autoPostsButton.addEventListener("click", () => {
@@ -832,6 +906,7 @@ elements.autoPostsForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(collectAutoPosts())
     });
     fillAutoPosts(data.settings);
+    saveAutoPostsDraft();
     setAutoPostsToast("Saved.");
   } catch (error) {
     setAutoPostsToast(error.message, true);
@@ -846,19 +921,26 @@ elements.mentionRepliesForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(collectMentionReplies())
     });
     fillMentionReplies(data.settings);
+    saveMentionRepliesDraft();
     setMentionRepliesToast("Saved.");
   } catch (error) {
     setMentionRepliesToast(error.message, true);
   }
 });
 
-for (const input of elements.editorForm.querySelectorAll("input, textarea")) {
-  input.addEventListener("input", renderPreview);
-}
+elements.editorForm.addEventListener("input", renderAndSaveDraft);
+elements.editorForm.addEventListener("change", renderAndSaveDraft);
+elements.autoPostsForm.addEventListener("input", saveAutoPostsDraft);
+elements.autoPostsForm.addEventListener("change", saveAutoPostsDraft);
+elements.mentionRepliesForm.addEventListener("input", saveMentionRepliesDraft);
+elements.mentionRepliesForm.addEventListener("change", saveMentionRepliesDraft);
 
 await loadMe();
 await refreshHealth();
 await loadScripts();
+restoreEditorDraft();
 await loadAutoPosts();
+restoreAutoPostsDraft();
 await loadMentionReplies();
+restoreMentionRepliesDraft();
 setInterval(refreshHealth, 5000);

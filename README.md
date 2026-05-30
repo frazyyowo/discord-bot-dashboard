@@ -12,6 +12,7 @@ Custom Discord bot plus a private web dashboard.
 - Script files stored in `data/scripts/*.json`
 - Rules panel in `data/scripts/rules.json`
 - Auto post settings for Twitch, TikTok, YouTube, and YouTube VODs
+- Browser draft backups for panels, auto posts, and mention replies
 - Secret webhook endpoint for external automation tools
 - Twitch EventSub auto-post when your stream goes live
 
@@ -101,6 +102,8 @@ Custom Discord bot plus a private web dashboard.
    ```
 
 10. Log in with Discord, edit a script, set a channel ID, then press Save or Send.
+
+The dashboard also keeps a browser draft while you type. If the host restarts or the page reloads, your last panel draft should come back when you open the dashboard again.
 
 ## Connect Your Domain
 
